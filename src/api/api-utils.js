@@ -1,7 +1,8 @@
 // src/api/api-utils.js
 // Utility functions for managing organization context and API requests
 
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+// const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API_URL = import.meta.env.VITE_API_URL?.trim() || "https://teamflow-backend-1tt9.onrender.com";
 
 /**
  * Get authentication headers with JWT token

@@ -1,10 +1,12 @@
 
 // src/api/auth.js 
-const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+// const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+const API_URL = import.meta.env.VITE_API_URL?.trim() || "https://teamflow-backend-1tt9.onrender.com";
+
 
 /* --------------------  SignUp  -------------------- */
 export async function signupUser(data) {
-  // ✅ Ensure correct data format for multi-tenant signup
+  //  Ensure correct data format for multi-tenant signup
   const signupData = {
     full_name: data.full_name || data.fullName, // Accept both naming conventions
     email: data.email,
