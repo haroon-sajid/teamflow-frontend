@@ -50,7 +50,8 @@ Backend Repository: [https://github.com/haroonsajid-ai/teamflow-backend](https:/
 ## Folder Structure
 
 ```markdown
-frontend/
+teamflow-frontend/
+├── node_modules/ 
 ├── public/
 │   └── index.html
 ├── src/
@@ -61,10 +62,17 @@ frontend/
 │   ├── modals/             # Reusable modal components
 │   ├── pages/              # Main route-level pages (Dashboard, Login, etc.)
 │   ├── styles/             # Global styles (CSS/Tailwind)
-│   ├── utils/              # Helper functions
 │   ├── App.jsx
-│   └── main.jsx
-└── package.json
+│   ├── index.css
+│   ├── main.jsx
+└── .gitignore 
+└── eslint.config.js
+└── index.html
+└── package.json 
+└── package-lock.json
+└── README.md
+└── vercel.json
+└── vite.config.js
 
 ````
 
