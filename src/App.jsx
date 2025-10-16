@@ -14,6 +14,7 @@ import AcceptInvitation from "./pages/AcceptInvitation";
 import InviteUser from "./pages/InviteUser";
 import Reports from "./pages/Reports";
 
+
 // src/main.jsx
 import axios from 'axios';
 

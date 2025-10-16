@@ -1,0 +1,173 @@
+
+/* ==================== NAVBAR.CSS ==================== */
+
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background: white;
+  transition: all 0.3s ease;
+  border-bottom: 1px solid transparent;
+}
+
+.navbar-scrolled {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  border-bottom: 1px solid var(--border-gray);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text-dark);
+  cursor: pointer;
+}
+
+.logo-icon {
+  font-size: 24px;
+}
+
+.navbar-menu {
+  display: flex;
+  list-style: none;
+  gap: 32px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-menu li a {
+  text-decoration: none;
+  color: var(--text-gray);
+  font-size: 15px;
+  font-weight: 500;
+  transition: color 0.3s ease;
+}
+
+.navbar-menu li a:hover {
+  color: var(--primary-blue);
+}
+
+.navbar-actions {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.navbar-btn-secondary {
+  background: transparent;
+  color: var(--text-dark);
+  border: none;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navbar-btn-secondary:hover {
+  background: var(--bg-light);
+}
+
+.navbar-btn-primary {
+  background: var(--primary-blue);
+  color: white;
+  border: none;
+  padding: 8px 20px;
+  font-size: 14px;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.navbar-btn-primary:hover {
+  background: var(--secondary-blue);
+}
+
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+}
+
+.mobile-menu-toggle span {
+  width: 24px;
+  height: 2px;
+  background: var(--text-dark);
+  transition: all 0.3s ease;
+}
+
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  background: white;
+  border-bottom: 1px solid var(--border-gray);
+  box-shadow: var(--shadow-md);
+}
+
+.mobile-menu a {
+  display: block;
+  padding: 16px 20px;
+  color: var(--text-dark);
+  text-decoration: none;
+  font-size: 16px;
+  font-weight: 500;
+  border-bottom: 1px solid var(--bg-light);
+  transition: background 0.3s ease;
+}
+
+.mobile-menu a:hover {
+  background: var(--bg-light);
+  color: var(--primary-blue);
+}
+
+.mobile-menu-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 20px;
+}
+
+.mobile-menu-actions button {
+  width: 100%;
+}
+
+@media (max-width: 968px) {
+  .navbar-menu {
+    display: none;
+  }
+
+  .navbar-actions {
+    display: none;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  .mobile-menu {
+    display: block;
+  }
+}
