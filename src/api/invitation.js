@@ -1,6 +1,6 @@
 // src/api/invitation.js
-// const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-const API_URL = import.meta.env.VITE_API_URL?.trim() || "https://teamflow-backend-1tt9.onrender.com";
+const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+// const API_URL = import.meta.env.VITE_API_URL?.trim() || "https://teamflow-backend-1tt9.onrender.com";
 
 function authHeaders() {
   const token = localStorage.getItem("token");
