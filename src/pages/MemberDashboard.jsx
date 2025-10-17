@@ -4,7 +4,7 @@ import TaskCard from "../components/TaskCard";
 import TaskModal from "../components/modals/TaskModal";
 import { getTasks, updateTask } from "../api/tasks.js";
 import { getProjects } from "../api/projects.js";
-import { getUsersSafe as getUsers } from "../api/users.js";
+import { getUsers } from "../api/users.js";
 import { updateTaskStatusOnly } from "../api/tasks.js";
 import { AuthContext } from "../context/AuthContext";
 import toast from "react-hot-toast";

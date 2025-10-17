@@ -346,4 +346,3 @@ export async function updateTaskStatusOnly(id, status) {
   }
   return res.json();
 }
-

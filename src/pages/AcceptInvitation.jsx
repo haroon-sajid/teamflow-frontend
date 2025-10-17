@@ -2,12 +2,14 @@
 import { useState, useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import { validateInvitationToken, acceptInvitation } from "../api/invitation";
+import { validateInvitationToken, acceptInvitation } from "../api/auth"; // or "../api/invitation"
 
 export default function AcceptInvitation() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  // const token = searchParams.get("token");
   const token = searchParams.get("token");
+  console.log("🔍 Raw token from URL:", token); // ADD THIS
   
   const [invitation, setInvitation] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -41,6 +43,7 @@ export default function AcceptInvitation() {
       setValidating(false);
     }
   };
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
