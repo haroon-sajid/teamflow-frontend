@@ -27,9 +27,11 @@ export const AuthProvider = ({ children }) => {
       }
     } catch (error) {
       console.error("Auth check failed:", error);
+      // Only logout on token-related errors, not general 403s
       if (
-        (error && error.message && (error.message.includes("401") || error.message.includes("403"))) ||
-        error?.status === 401
+        (error && error.message && error.message.includes("401")) ||
+        error?.status === 401 ||
+        (error?.status === 403 && error.message?.includes("Invalid token"))
       ) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");

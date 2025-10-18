@@ -39,28 +39,6 @@ export async function getCurrentUser() {
   return result;
 }
 
-/* --------------------  GET ALL USERS (Organization-scoped)  -------------------- */
-
-// export async function getUsers() {
-//   const organizationId = getOrganizationId();
-  
-//   const res = await fetch(`${API_URL}/users/?organization_id=${organizationId}`, {
-//     headers: authHeaders(),
-//   });
-
-//   const result = await res.json();
-//   if (!res.ok) {
-//     if (res.status === 401 || res.status === 403) {
-//       localStorage.removeItem("token");
-//       localStorage.removeItem("user");
-//       localStorage.removeItem("organizationId");
-//       window.location.href = "/login";
-//     }
-//     throw new Error(result.detail || "Failed to load users");
-//   }
-//   return result;
-// }
-
 
 /* -----------  GET ORG-SCOPED USERS (ADMIN DASHBOARD)  ----------- */
 export async function getUsers() {
@@ -70,13 +48,21 @@ export async function getUsers() {
 
   const result = await res.json();
   if (!res.ok) {
-    if (res.status === 401 || res.status === 403) {
+    if (res.status === 401) {
+      // Unauthorized → clear login
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       localStorage.removeItem("organizationId");
       window.location.href = "/login";
+    } else if (res.status === 403) {
+      // Forbidden → member not allowed to access this resource
+      // Silently handle 403 for members to prevent console errors
+      if (import.meta.env.DEV || import.meta.env.NODE_ENV === "development") {
+        console.info("Member access restricted (403) — skipping users fetch.");
+      }
+      return []; // Return empty list instead of forcing logout
     }
-    throw new Error(result.detail || "Failed to load users");
+    throw new Error(result.detail || `Unexpected response: ${res.status}`);
   }
   return result;
 }

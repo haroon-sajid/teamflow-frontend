@@ -11,14 +11,22 @@ export default function TeamMembersList() {
     const fetchMembers = async () => {
       try {
         setLoading(true);
-        const usersData = await getUsers();
         
-        // Filter only members (not admins)
-        const memberList = usersData.filter(
-          user => user.role?.toLowerCase() === "member"
-        );
-        
-        setMembers(memberList);
+        // Check user role before fetching users
+        const user = JSON.parse(localStorage.getItem("user"));
+        if (user?.role === "admin" || user?.role === "super_admin") {
+          const usersData = await getUsers();
+          
+          // Filter only members (not admins)
+          const memberList = usersData.filter(
+            user => user.role?.toLowerCase() === "member"
+          );
+          
+          setMembers(memberList);
+        } else {
+          // Members don't fetch users list
+          setMembers([]);
+        }
       } catch (error) {
         console.error("Failed to load team members:", error);
         toast.error("Failed to load team members");

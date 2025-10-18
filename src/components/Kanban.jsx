@@ -89,10 +89,19 @@ const Kanban = forwardRef((props, ref) => {
     const loadProjectsAndUsers = async () => {
       try {
         setLoadingDependencies(true);
-        const [projData, userData] = await Promise.all([
-          getProjects(),
-          getUsers(),
-        ]);
+        
+        // Check user role before fetching users
+        const user = JSON.parse(localStorage.getItem("user"));
+        let userData = [];
+        
+        if (user?.role === "admin" || user?.role === "super_admin") {
+          userData = await getUsers();
+        } else {
+          // Members don't fetch users list
+          userData = [];
+        }
+        
+        const projData = await getProjects();
         setProjects(projData || []);
         setUsers(userData || []);
       } catch (e) {

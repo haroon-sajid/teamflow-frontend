@@ -57,50 +57,57 @@ export default function MemberDashboard() {
       const projectsData = await getProjects();
       setProjects(projectsData || []);
 
-      //   Handle member access to users endpoint gracefully
-      try {
-        const usersData = await getUsers();
-        // Filter users by organization
-        const orgUsers = usersData.filter(u => u.organization_id === userOrgId);
-        setUsers(orgUsers);
-      } catch (error) {
-        console.warn("⚠️ Could not fetch users, using minimal user set:", error.message);
-        
-        //  If member can't access all users, create a minimal users array
-        // This prevents logout and allows tasks to render
-        const minimalUsers = [
-          {
-            id: parseInt(memberId),
-            full_name: user?.full_name || userName,
-            email: user?.email || 'member@example.com',
-            organization_id: userOrgId,
-            role: 'member'
-          }
-        ];
+      // Check user role before fetching users
+      const user = JSON.parse(localStorage.getItem("user"));
+      if (user?.role === "admin" || user?.role === "super_admin") {
+        // Admins and Super Admins can fetch users
+        try {
+          const usersData = await getUsers();
+          // Filter users by organization
+          const orgUsers = usersData.filter(u => u.organization_id === userOrgId);
+          setUsers(orgUsers);
+        } catch (error) {
+          console.warn("⚠️ Could not fetch users, using minimal user set:", error.message);
+          
+          // If member can't access all users, create a minimal users array
+          // This prevents logout and allows tasks to render
+          const minimalUsers = [
+            {
+              id: parseInt(memberId),
+              full_name: user?.full_name || userName,
+              email: user?.email || 'member@example.com',
+              organization_id: userOrgId,
+              role: 'member'
+            }
+          ];
 
-        // Add other assigned members from tasks
-        const memberIds = new Set();
-        normalized.forEach(task => {
-          if (task.member_ids) {
-            task.member_ids.forEach(id => {
-              if (id !== parseInt(memberId)) {
-                memberIds.add(id);
-              }
-            });
-          }
-        });
-
-        memberIds.forEach(id => {
-          minimalUsers.push({
-            id: id,
-            full_name: `Team Member ${id}`,
-            email: `member${id}@example.com`,
-            organization_id: userOrgId,
-            role: 'member'
+          // Add other assigned members from tasks
+          const memberIds = new Set();
+          normalized.forEach(task => {
+            if (task.member_ids) {
+              task.member_ids.forEach(id => {
+                if (id !== parseInt(memberId)) {
+                  memberIds.add(id);
+                }
+              });
+            }
           });
-        });
 
-        setUsers(minimalUsers);
+          memberIds.forEach(id => {
+            minimalUsers.push({
+              id: id,
+              full_name: `Team Member ${id}`,
+              email: `member${id}@example.com`,
+              organization_id: userOrgId,
+              role: 'member'
+            });
+          });
+
+          setUsers(minimalUsers);
+        }
+      } else {
+        // Members don't fetch users list - prevent the 403 call entirely
+        setUsers([]);
       }
       
     } catch (e) {
