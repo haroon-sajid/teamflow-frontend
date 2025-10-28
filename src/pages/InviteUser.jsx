@@ -2,6 +2,7 @@
 import toast from "react-hot-toast";
 import { useState, useContext, useEffect } from "react";
 import Layout from "../components/Layout";
+import Header from "../components/Header.jsx";
 import InviteMemberModal from "../components/modals/InviteMemberModal"; 
 import ConfirmationModal from "../components/modals/ConfirmationModal"; // Add this import
 import { invitationAPI } from "../api/invitationAPI";
@@ -117,12 +118,14 @@ export default function InviteMembers() {
 
   return (
     <Layout>
-      <div className="invite-members-page">
-        <div className="page-header">
-          <h1>Invite Members</h1>
-          <p className="subtitle">Send invitations to team members to join your workspace</p>
-        </div>
+      <Header
+        title="Invite Members"
+        subtitle="Send invitations to team members to join your workspace"
+        actionButtonText="+ Send Invite"
+        onActionClick={() => setShowModal(true)}
+      />
 
+      <div className="invite-members-page">
         <InviteMemberModal
           isOpen={showModal}
           onClose={() => setShowModal(false)}
@@ -143,12 +146,6 @@ export default function InviteMembers() {
         <section className="card">
           <div className="card-header">
             <h2>Team Invitations</h2>
-            <button 
-              className="primary-btn add-btn" 
-              onClick={() => setShowModal(true)}
-            >
-              + Send Invite
-            </button>
           </div>
 
           <div className="table-wrapper">
@@ -228,4 +225,3 @@ export default function InviteMembers() {
     </Layout>
   );
 }
-

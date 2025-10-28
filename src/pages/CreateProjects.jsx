@@ -2,6 +2,7 @@
 import { createProject, getProjects, updateProject, deleteProject } from "../api/projects.js";
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout.jsx";
+import Header from "../components/Header.jsx";
 import ProjectModal from "../components/modals/ProjectModal.jsx"
 import ConfirmationModal from "../components/modals/ConfirmationModal.jsx";
 import toast from "react-hot-toast";
@@ -108,10 +109,12 @@ export default function ProjectManagement() {
   /* ---------- Render ---------- */
   return (
     <Layout>
-      <div className="page-header">
-        <h1>Project Management</h1>
-        <p className="subtitle">Add new projects and manage existing ones.</p>
-      </div>
+      <Header
+        title="Project Management"
+        subtitle="Add new projects and manage existing ones."
+        actionButtonText="+ Add Project"
+        onActionClick={openAdd}
+      />
 
       {showModal && (
         <ProjectModal
@@ -146,9 +149,6 @@ export default function ProjectManagement() {
       <section className="project-list card">
         <div className="card-header">
           <h2>Existing Projects</h2>
-          <button className="primary-btn add-btn" onClick={openAdd}>
-            + Add Project
-          </button>
         </div>
 
         <div className="table-wrapper">

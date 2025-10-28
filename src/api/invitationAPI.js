@@ -23,9 +23,8 @@ export const invitationAPI = {
 
 
 
-// src/api/invitationAPI.js  (or add to existing invitationAPI file)
-// const API_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
-const API_URL = import.meta.env.VITE_API_URL?.trim() || "https://teamflow-backend-1tt9.onrender.com";
+import { API_URL } from "../config/apiConfig";
+console.log(API_URL);
 
 function authHeaders() {
   const token = localStorage.getItem("token");

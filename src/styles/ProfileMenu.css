@@ -1,0 +1,314 @@
+/* ===============================
+   PROFILE MENU STYLES
+   =============================== */
+
+/* Profile Menu Container */
+.profile-menu-container {
+  position: relative;
+  width: 100%;
+}
+
+
+/* Profile Button - Matches sidebar button styling */
+.profile-button {
+  display: flex;
+  align-items: center;            /* Vertically center icon/text */
+  justify-content: flex-start;    /* Push content to the left */
+  background: transparent;
+  border: none;
+  padding: 8px 12px;
+  color: #e2e8f0;
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+  width: 100%;
+  box-sizing: border-box;
+  gap: 12px;
+  padding-left: 4px;              
+}
+
+
+.profile-button:hover {
+  background: #1e293b;
+}
+
+/* Profile Avatar */
+.profile-avatar {
+  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  position: relative;
+}
+
+.profile-avatar img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profile-avatar > div {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 500;
+  font-size: 0.875rem;
+}
+
+/* Profile Info */
+.profile-info {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.profile-name {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+}
+
+.profile-email {
+  font-size: 0.75rem;
+  color: #94a3b8;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+/* Profile Arrow */
+.profile-arrow {
+  flex-shrink: 0;
+  color: #94a3b8;
+  transition: color 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.profile-button:hover .profile-arrow {
+  color: #cbd5e1;
+}
+
+.profile-dropdown {
+  position: absolute;
+  bottom: 100%;
+  left: -20px; /* Move 20px to the left */
+  width: 240px;
+  background: #1e293b;
+  border: 1px solid #334155;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3),
+              0 8px 10px -6px rgba(0, 0, 0, 0.2);
+  z-index: 1001;
+  overflow: hidden;
+  backdrop-filter: blur(8px);
+  margin-bottom: 8px;
+}
+
+
+.dropdown-header {
+  padding: 12px 16px;
+  border-bottom: 1px solid #334155;
+  background: rgba(30, 41, 59, 0.95);
+}
+
+.dropdown-items {
+  padding: 4px 0;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 8px 16px;
+  background: transparent;
+  border: none;
+  color: #e2e8f0;
+  font-size: 0.875rem;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+  text-align: left;
+}
+
+.dropdown-item:hover {
+  background: #334155;
+}
+
+.dropdown-item.text-red-400 {
+  color: #f87171;
+}
+
+.dropdown-item.text-red-400:hover {
+  color: #fca5a5;
+  background: rgba(239, 68, 68, 0.1);
+}
+
+/* Flex utility classes */
+.flex {
+  display: flex;
+}
+
+.items-center {
+  align-items: center;
+}
+
+.justify-center {
+  justify-content: center;
+}
+
+.flex-1 {
+  flex: 1;
+}
+
+.min-w-0 {
+  min-width: 0;
+}
+
+.gap-3 {
+  gap: 12px;
+}
+
+.mb-2 {
+  margin-bottom: 8px;
+}
+
+/* Text utility classes */
+.text-white {
+  color: white;
+}
+
+.text-slate-400 {
+  color: #94a3b8;
+}
+
+.text-sm {
+  font-size: 0.875rem;
+}
+
+.text-xs {
+  font-size: 0.75rem;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+/* Border utility classes */
+.border-t {
+  border-top: 1px solid;
+}
+
+.border-slate-700 {
+  border-color: #334155;
+}
+
+.my-1 {
+  margin-top: 4px;
+  margin-bottom: 4px;
+}
+
+/* Gradient background */
+.bg-gradient-to-br {
+  background-image: linear-gradient(to bottom right, var(--tw-gradient-stops));
+}
+
+.from-blue-500 {
+  --tw-gradient-from: #3b82f6;
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to, rgba(59, 130, 246, 0));
+}
+
+.to-purple-600 {
+  --tw-gradient-to: #9333ea;
+}
+
+/* ===============================
+   RESPONSIVE ADJUSTMENTS
+   =============================== */
+
+/* Tablets and smaller screens */
+@media (max-width: 1024px) {
+  .profile-button {
+    padding: 6px 10px;
+    gap: 10px;
+  }
+  
+  .profile-avatar {
+    width: 28px;
+    height: 28px;
+  }
+  
+  .profile-name {
+    font-size: 0.8rem;
+  }
+  
+  .profile-email {
+    font-size: 0.7rem;
+  }
+  
+  .profile-dropdown {
+    width: 220px;
+  }
+}
+
+/* Mobile - when sidebar is collapsed */
+@media (max-width: 600px) {
+  .sidebar:not(.mobile-open) .profile-info {
+    display: none;
+  }
+  
+  .sidebar:not(.mobile-open) .profile-arrow {
+    display: none;
+  }
+  
+  .sidebar:not(.mobile-open) .profile-button {
+    justify-content: center;
+    padding: 8px;
+  }
+  
+  .sidebar.mobile-open .profile-info {
+    display: flex;
+  }
+  
+  .sidebar.mobile-open .profile-arrow {
+    display: flex;
+  }
+  
+  .profile-dropdown {
+    width: calc(100% - 20px);
+    left: 10px !important;
+    right: 10px;
+  }
+}
+
+/* Small mobile devices */
+@media (max-width: 480px) {
+  .profile-dropdown {
+    width: calc(100% - 16px);
+    left: 8px !important;
+    right: 8px;
+  }
+  
+  .sidebar.mobile-open .profile-button {
+    padding: 8px 12px;
+  }
+}
+
+/* Ensure proper z-index stacking */
+.profile-dropdown {
+  z-index: 1001;
+}

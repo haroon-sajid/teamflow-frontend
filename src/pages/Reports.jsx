@@ -1,6 +1,7 @@
 // src/pages/AnalyticsDashboard.jsx
 import React, { useState, useEffect } from 'react';
 import Layout from '../components/Layout';
+import Header from '../components/Header.jsx';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { getProjects } from "../api/projects.js";
 import { getTasks } from "../api/tasks.js";
@@ -114,16 +115,14 @@ export default function AnalyticsDashboard() {
   if (loading) {
     return (
       <Layout>
-        <div className="analytics-dashboard">
-          <div className="dashboard-header">
-            <h1>Project Analytics</h1>
-            <p>Comprehensive overview of projects, tasks, and team performance</p>
-          </div>
-          
-          <div className="loading-container">
-            <div className="spinner"></div>
-            <p>Loading analytics data...</p>
-          </div>
+        <Header
+          title="Project Analytics"
+          subtitle="Comprehensive overview of projects, tasks, and team performance"
+        />
+        
+        <div className="loading-container">
+          <div className="spinner"></div>
+          <p>Loading analytics data...</p>
         </div>
       </Layout>
     );
@@ -131,33 +130,32 @@ export default function AnalyticsDashboard() {
 
   return (
     <Layout>
+      <Header
+        title="Project Analytics"
+        subtitle="Comprehensive overview of projects, tasks, and team performance"
+      />
+
       <div className="analytics-dashboard">
-        {/* Dashboard Header */}
-        <div className="dashboard-header">
-          <div>
-            <h1>Project Analytics</h1>
-            <p>Comprehensive overview of projects, tasks, and team performance</p>
-          </div>
-          <div className="header-controls">
-            <select 
-              className="time-filter"
-              value={timeRange}
-              onChange={(e) => setTimeRange(e.target.value)}
-            >
-              <option value="last7days">Last 7 Days</option>
-              <option value="last30days">Last 30 Days</option>
-              <option value="last90days">Last 90 Days</option>
-              <option value="yearToDate">Year to Date</option>
-            </select>
-            <button className="export-btn">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" y1="15" x2="12" y2="3"></line>
-              </svg>
-              Export Report
-            </button>
-          </div>
+        {/* Dashboard Header Controls */}
+        <div className="header-controls">
+          <select 
+            className="time-filter"
+            value={timeRange}
+            onChange={(e) => setTimeRange(e.target.value)}
+          >
+            <option value="last7days">Last 7 Days</option>
+            <option value="last30days">Last 30 Days</option>
+            <option value="last90days">Last 90 Days</option>
+            <option value="yearToDate">Year to Date</option>
+          </select>
+          <button className="export-btn">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+            Export Report
+          </button>
         </div>
 
         {/* Tab Navigation */}
@@ -458,4 +456,3 @@ export default function AnalyticsDashboard() {
     </Layout>
   );
 }
-

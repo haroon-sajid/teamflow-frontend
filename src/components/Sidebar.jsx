@@ -2,115 +2,134 @@
 import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { useState, useEffect } from "react";
-// Import professional icons
-import { 
-  FiHome, 
-  FiFolder, 
-  FiCheckSquare, 
-  FiUser, 
-  FiBarChart2, 
+import "../styles/Sidebar.css"; 
+import "../styles/ProfileMenu.css";
+
+import {
+  FiHome,
+  FiFolder,
+  FiCheckSquare,
+  FiUser,
+  FiBarChart2,
   FiLogOut,
   FiUsers,
-  FiFileText
+  FiFileText,
+  FiSettings,
+  FiMenu,
+  FiX
 } from "react-icons/fi";
+
+import ProfileMenu from "./profile/ProfileMenu";
 
 export default function Sidebar() {
   const nav = useNavigate();
   const location = useLocation();
   const [userRole, setUserRole] = useState("");
+  const [isMobileOpen, setIsMobileOpen] = useState(false);
 
-  // Get user role from localStorage on mount
   useEffect(() => {
     const role = localStorage.getItem("userRole");
     setUserRole(role || "");
   }, []);
 
-  const handleLogout = () => {
-    localStorage.clear();
-    toast.success("Logged out");
-    nav("/login");
-  };
-
-  /* helper to highlight the active route */
   const isActive = (path) => (location.pathname === path ? "active" : "");
-
-  // ✅ FIXED: Check if user is admin OR super_admin
   const isAdminUser = userRole === "admin" || userRole === "super_admin";
 
+  const closeMobileSidebar = () => {
+    setIsMobileOpen(false);
+  };
+
   return (
-    <aside className="sidebar">
-      <div className="sidebar-header">
-        <h2 className="logo">TeamFlow</h2>
-        <p className="tagline">
-          {isAdminUser ? "Admin Panel" : "Member Panel"}
-        </p>
-      </div>
+    <>
+      {/* Mobile Menu Toggle Button */}
+      <button 
+        className="mobile-menu-toggle"
+        onClick={() => setIsMobileOpen(!isMobileOpen)}
+      >
+        {isMobileOpen ? <FiX /> : <FiMenu />}
+      </button>
 
-      <nav className="sidebar-nav">
-        {/* ------------ Role-based buttons ------------ */}
-        {isAdminUser ? (
-          <>
-            <button
-              className={`sidebar-btn ${isActive("/admin")}`}
-              onClick={() => nav("/admin")}
-            >
-              <FiHome className="sidebar-icon" />
-              <span>Dashboard</span>
-            </button>
+      {/* Overlay for mobile */}
+      {isMobileOpen && (
+        <div 
+          className="sidebar-overlay"
+          onClick={closeMobileSidebar}
+        ></div>
+      )}
 
-            <button
-              className={`sidebar-btn ${isActive("/projects")}`}
-              onClick={() => nav("/projects")}
-            >
-              <FiFolder className="sidebar-icon" />
-              <span>Create Projects</span>
-            </button>
+      <aside className={`sidebar ${isMobileOpen ? 'mobile-open' : ''}`}>
+        <div className="sidebar-header">
+          <h2 className="logo">TeamFlow</h2>
+          <p className="tagline">
+            {isAdminUser ? "Admin Panel" : "Member Panel"}
+          </p>
+        </div>
 
-            <button
-              className={`sidebar-btn ${isActive("/create-task")}`}
-              onClick={() => nav("/create-task")}
-            >
-              <FiCheckSquare className="sidebar-icon" />
-              <span>Create Tasks</span>
-            </button>
+        <nav className="sidebar-nav">
+          {isAdminUser ? (
+            <>
+              <button
+                className={`sidebar-btn ${isActive("/admin")}`}
+                onClick={() => { nav("/admin"); closeMobileSidebar(); }}
+              >
+                <FiHome className="sidebar-icon" />
+                <span className="sidebar-text">Dashboard</span>
+              </button>
 
-            <button
-              className={`sidebar-btn ${isActive("/invite-user")}`}
-              onClick={() => nav("/invite-user")}
-            >
-              <FiUser className="sidebar-icon" />
-              <span>Invite Users</span>
-            </button>
+              <button
+                className={`sidebar-btn ${isActive("/projects")}`}
+                onClick={() => { nav("/projects"); closeMobileSidebar(); }}
+              >
+                <FiFolder className="sidebar-icon" />
+                <span className="sidebar-text">Projects</span>
+              </button>
 
-            <button
-              className={`sidebar-btn ${isActive("/reports")}`}
-              onClick={() => nav("/reports")}
-            >
-              <FiBarChart2 className="sidebar-icon" />
-              <span>Reports</span>
-            </button>
-          </>
-        ) : (
-          <>
-            {/* Member buttons */}
-            <button
-              className={`sidebar-btn ${isActive("/member")}`}
-              onClick={() => nav("/member")}
-            >
-              <FiHome className="sidebar-icon" />
-              <span>Dashboard</span>
-            </button>
-          </>
-        )}
-        {/* ---------------------------------------- */}
-      </nav>
+              <button
+                className={`sidebar-btn ${isActive("/create-task")}`}
+                onClick={() => { nav("/create-task"); closeMobileSidebar(); }}
+              >
+                <FiCheckSquare className="sidebar-icon" />
+                <span className="sidebar-text">Tasks</span>
+              </button>
 
-      <div className="sidebar-footer">
-        <button className="logout-btn" onClick={handleLogout}>
-          <FiLogOut className="sidebar-icon" />
-          <span>Logout</span>
-        </button>
-      </div>
-    </aside>
+              <button
+                className={`sidebar-btn ${isActive("/invite-user")}`}
+                onClick={() => { nav("/invite-user"); closeMobileSidebar(); }}
+              >
+                <FiUsers className="sidebar-icon" />
+                <span className="sidebar-text">Invite Users</span>
+              </button>
+
+              <button
+                className={`sidebar-btn ${isActive("/reports")}`}
+                onClick={() => { nav("/reports"); closeMobileSidebar(); }}
+              >
+                <FiBarChart2 className="sidebar-icon" />
+                <span className="sidebar-text">Reports</span>
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                className={`sidebar-btn ${isActive("/member")}`}
+                onClick={() => { nav("/member"); closeMobileSidebar(); }}
+              >
+                <FiHome className="sidebar-icon" />
+                <span className="sidebar-text">Dashboard</span>
+              </button>
+            </>
+          )}
+
+          <div className="sidebar-divider"></div>
+        </nav>
+
+        {/* Updated Footer with Profile Icon */}
+        <div className="sidebar-footer">
+          <div className="flex items-center justify-center py-4 border-t border-slate-700">
+            <ProfileMenu />
+          </div>
+        </div>
+      </aside>
+    </>
   );
 }
