@@ -487,6 +487,13 @@ html, body, #root {
 
 
 
+
+
+
+
+
+
+
 /* ===============================
    ADMIN DASHBOARD LAYOUT
    =============================== */
@@ -915,6 +922,11 @@ html, body, #root {
 }
 
 
+
+
+
+
+
 /* ===============================
    Team Members Section
    =============================== */
@@ -1301,8 +1313,9 @@ html, body, #root {
 
 /* Edit button - Blue color (changed from green to match requested color) */
 .project-edit-btn {
-  background: #3b82f6; 
+  background: #4f46e5; 
   color: white;
+
 }
 
 /* Delete button - Red color */
@@ -1313,7 +1326,7 @@ html, body, #root {
 
 /* Hover effects */
 .project-edit-btn:hover:not(:disabled) {
-  background: #1d4ed8; /* Darker blue */
+  background: #4338ca; /* Darker blue */
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
@@ -1966,6 +1979,9 @@ html, body, #root {
 
 
 
+
+
+
 /* ========================================
    Invite Member Page - Separate Button Styles
    ======================================== */
@@ -1988,14 +2004,14 @@ html, body, #root {
 }
 
 .invitation-resend-btn {
-  background: #3b82f6; /* Changed to match requested color */
+  background: #4f46e5; /* Changed to match requested color */
   color: white;
-  border-color: #3b82f6;
+  border-color: #4f46e5;
 }
 
 .invitation-resend-btn:hover:not(:disabled) {
-  background: #1d4ed8; /* Darker shade for hover */
-  border-color: #1d4ed8;
+  background: #4338ca; /* Darker shade for hover */
+  border-color: #4338ca;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
@@ -2015,14 +2031,14 @@ html, body, #root {
 
 
 .invitation-send-new-btn {
-  background: #3b82f6; /* Changed to match requested color */
+  background: #4f46e5; /* Changed to match requested color */
   color: white;
-  border-color: #3b82f6;
+  border-color: #4f46e5;
 }
 
 .invitation-send-new-btn:hover:not(:disabled) {
-  background: #1d4ed8; /* Darker shade for hover */
-  border-color: #1d4ed8;
+  background: #4338ca; /* Darker shade for hover */
+  border-color: #4338ca;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
@@ -2110,6 +2126,11 @@ html, body, #root {
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
 }
+
+
+
+
+
 
 
 

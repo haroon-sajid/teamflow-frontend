@@ -144,7 +144,7 @@ export default function InviteMemberModal({
                   <div className="radio-header">
                     <span className="radio-label" style={{ fontWeight: '500' }}>{option.label}</span>
                   </div>
-                  <p className="radio-description" style={{ margin: '4px 0 0 0', fontSize: '14px', color: '#6b7280' }}>{option.description}</p>
+                  <p className="radio-description" style={{ margin: '4px 0 0 0', fontSize: '10px', color: '#6b7280' }}>{option.description}</p>
                 </div>
               </label>
             ))}

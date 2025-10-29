@@ -52,7 +52,7 @@
   max-width: 700px;
 }
 
-.create-task-action-btn {
+/* .create-task-action-btn {
   background: #3b82f6;
   color: white;
   border: none;
@@ -75,7 +75,7 @@
   background: #2563eb;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
-}
+} */
 
 /* ========================================
    Kanban Wrapper - Only layout
@@ -184,10 +184,10 @@
    Accessibility
    ======================================== */
 
-.create-task-action-btn:focus-visible {
+/* .create-task-action-btn:focus-visible {
   outline: 2px solid #3b82f6;
   outline-offset: 2px;
-}
+} */
 
 @media (prefers-reduced-motion: reduce) {
   .create-task-action-btn {

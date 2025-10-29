@@ -80,25 +80,26 @@
 
 .action-buttons .primary-btn,
 .action-buttons .secondary-btn {
-  padding: 12px 20px;
+  padding: 10px 20px;
   border-radius: 8px;
   font-weight: 500;
   font-size: 0.95rem;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   border: none;
   cursor: pointer;
   white-space: nowrap;
   flex-shrink: 0;
+
 }
 
 .action-buttons .primary-btn {
-  background: #3b82f6;
+  background-color: #4f46e5;
   color: white;
 }
 
 .action-buttons .primary-btn:hover {
-  background: #2563eb;
-  transform: translateY(-2px);
+  background-color: #4338ca;
+  transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
@@ -244,7 +245,7 @@
 }
 
 .add-btn {
-  background: #3b82f6;
+  background-color: #4f46e5;
   color: white;
   border: none;
   padding: 10px 20px;
@@ -252,14 +253,15 @@
   font-size: 0.95rem;
   font-weight: 500;
   cursor: pointer;
-  transition: all 0.2s ease;
+  /* transition: all 0.2s ease; */
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease;
   white-space: nowrap;
+
 }
 
 .add-btn:hover {
-  background: #2563eb;
+  background-color: #4338ca;
   transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
 /* ===============================
