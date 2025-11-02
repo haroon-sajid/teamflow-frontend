@@ -11,7 +11,6 @@ import {
   postTaskComment,
   fetchTaskWorkLogs,
   postTaskWorkLog,
-  toggleTaskPermission
 } from "../../api/taskExtras";
 
 export default function TaskModal({
@@ -147,45 +146,47 @@ export default function TaskModal({
   };
 
 
+  // In TaskModal.jsx - FIXED handleSubmit function
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (!title.trim() || !projectId) { // ✅ REMOVED memberIds validation
+    toast.error("Please fill all required fields");
+    return;
+  }
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title.trim() || !projectId || memberIds.length === 0) {
-      toast.error("Please fill all required fields");
+  // Validate due_date format (ISO 8601)
+  let formattedDueDate = null;
+  if (dueDate) {
+    try {
+      formattedDueDate = new Date(dueDate).toISOString();
+    } catch (err) {
+      toast.error("Invalid date format");
       return;
     }
+  }
 
-    //  Validate due_date format (ISO 8601)
-    let formattedDueDate = null;
-    if (dueDate) {
-      try {
-        formattedDueDate = new Date(dueDate).toISOString();
-      } catch (err) {
-        toast.error("Invalid date format");
-        return;
-      }
-    }
-
-    const payload = {
-      id: editing?.id,          // ← NEW – preserves the id for updates
-      title,
-      description,
-      project_id: parseInt(projectId),
-      member_ids: memberIds,
-      priority,
-      due_date: formattedDueDate,
-      status,
-      allow_member_edit: allowMemberEdit
-    };
-
-    try {
-      await onSave(payload);
-      onClose();
-    } catch (error) {
-      console.error("Error saving task:", error);
-      toast.error(error.message || "Task operation failed");
-    }
+  // ✅ FIXED: Ensure member_ids is always an array, even if empty
+  const payload = {
+    id: editing?.id,
+    title,
+    description,
+    project_id: parseInt(projectId),
+    member_ids: memberIds || [], // ✅ FIXED: Always send array
+    priority,
+    due_date: formattedDueDate,
+    status,
+    allow_member_edit: allowMemberEdit
   };
+
+  try {
+    await onSave(payload);
+    onClose();
+  } catch (error) {
+    console.error("Error saving task:", error);
+    toast.error(error.message || "Task operation failed");
+  }
+};
+
 
   const currentUserOrgId = localStorage.getItem("organizationId");
   const orgUsers = users.filter(user => 
@@ -307,7 +308,7 @@ export default function TaskModal({
                     {projects
                       .filter(project => project.organization_id === parseInt(currentUserOrgId))
                       .map((p) => (
-                        <option key={p.id} value={p.id}>{p.name}</option>
+                        <option key={p.id} value={p.id}>{p.title}</option>
                       ))}
                   </select>
                 </div>

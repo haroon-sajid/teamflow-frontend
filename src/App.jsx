@@ -18,6 +18,9 @@ import Reports from "./pages/Reports";
 import ProfilePage from './components/profile/ProfilePage';
 import HelpSupport from './pages/HelpSupport';
 
+import PlansPage from './pages/PlansPage';
+import PaymentSuccess from './pages/PaymentSuccess';
+import PaymentCancel from './pages/PaymentCancel';
 
 // =========================================
 // ✅ Axios Interceptor for Token Auth
@@ -32,6 +35,7 @@ axios.interceptors.request.use(
   },
   (error) => Promise.reject(error)
 );
+
 
 // =========================================
 // ✅ App Component
@@ -54,11 +58,19 @@ function App() {
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<HelpSupport />} />
 
+        {/* 🔥 FIX: Update these routes to match Stripe redirect URLs */}
+        <Route path="/plans" element={<PlansPage />} />
+        <Route path="/payment/success" element={<PaymentSuccess />} />
+        <Route path="/payment/cancel" element={<PaymentCancel />} />
 
+        {/* Remove these duplicate routes or keep them as aliases */}
+        {/* <Route path="/payment-success" element={<PaymentSuccess />} /> */}
+        {/* <Route path="/payment-cancel" element={<PaymentCancel />} /> */}
 
-        {/* ✅ Added Profile Route */}
-        <Route path="/profile" element={<ProfilePage />} />
-        <Route path="/support" element={<HelpSupport />} />
+        {/* ✅ Remove these duplicates - they're already defined above */}
+        {/* <Route path="/profile" element={<ProfilePage />} /> */}
+        {/* <Route path="/plans" element={<PlansPage />} /> */}
+        {/* <Route path="/support" element={<HelpSupport />} /> */}
       </Routes>
     </>
   );

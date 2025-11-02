@@ -1,3 +1,316 @@
+// // src/api/users.js
+// import { API_URL } from "../config/apiConfig";
+// console.log(API_URL);
+
+// function authHeaders() {
+//   const token = localStorage.getItem("token");
+//   if (!token) throw new Error("No token found — please log in again");
+//   return {
+//     "Content-Type": "application/json",
+//     Authorization: `Bearer ${token}`,
+//   };
+// }
+
+// function getOrganizationId() {
+//   const orgId = localStorage.getItem("organizationId");
+//   if (!orgId) throw new Error("No organization ID found — please log in again");
+//   return parseInt(orgId);
+// }
+
+// /* --------------------  GET CURRENT USER PROFILE  -------------------- */
+// export async function getCurrentUser() {
+//   const res = await fetch(`${API_URL}/auth/me`, {
+//     headers: authHeaders(),
+//   });
+
+//   const result = await res.json();
+//   if (!res.ok) {
+//     // Handle authentication errors
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+//     const msg = result.detail || result.message || "Failed to fetch current user";
+//     throw new Error(msg);
+//   }
+
+//   return result;
+// }
+
+
+// /* -----------  GET ORG-SCOPED USERS (ADMIN DASHBOARD)  ----------- */
+// export async function getUsers() {
+//   const res = await fetch(`${API_URL}/users/`, {   // <- clean URL
+//     headers: authHeaders(),
+//   });
+
+//   const result = await res.json();
+//   if (!res.ok) {
+//     if (res.status === 401) {
+//       // Unauthorized → clear login
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     } else if (res.status === 403) {
+//       // Forbidden → member not allowed to access this resource
+//       // Silently handle 403 for members to prevent console errors
+//       if (import.meta.env.DEV || import.meta.env.NODE_ENV === "development") {
+//         console.info("Member access restricted (403) — skipping users fetch.");
+//       }
+//       return []; // Return empty list instead of forcing logout
+//     }
+//     throw new Error(result.detail || `Unexpected response: ${res.status}`);
+//   }
+//   return result;
+// }
+
+// /* --------------------  GET USER BY ID  -------------------- */
+// export async function getUser(id) {
+//   const organizationId = getOrganizationId();
+  
+//   const res = await fetch(`${API_URL}/users/${id}?organization_id=${organizationId}`, {
+//     headers: authHeaders(),
+//   });
+
+//   const result = await res.json();
+//   if (!res.ok) {
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+    
+//     // Handle specific forbidden case for members trying to access others
+//     if (res.status === 403) {
+//       throw new Error("You can only view users from your organization.");
+//     }
+//     const msg = result.detail || result.message || "Failed to load user";
+//     throw new Error(msg);
+//   }
+//   return result;
+// }
+
+// /* --------------------  UPDATE USER  -------------------- */
+// export async function updateUser(id, data) {
+//   const organizationId = getOrganizationId();
+  
+//   // Include organization_id to ensure user can only update their org's users
+//   const userData = {
+//     ...data,
+//     organization_id: organizationId
+//   };
+
+//   const res = await fetch(`${API_URL}/users/${id}`, {
+//     method: "PUT",
+//     headers: authHeaders(),
+//     body: JSON.stringify(userData),
+//   });
+
+//   const result = await res.json();
+//   if (!res.ok) {
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+//     throw new Error(result.detail || "Update failed");
+//   }
+//   return result;
+// }
+
+// /* --------------------  DELETE USER  -------------------- */
+// export async function deleteUser(id) {
+//   const organizationId = getOrganizationId();
+  
+//   const res = await fetch(`${API_URL}/users/${id}?organization_id=${organizationId}`, {
+//     method: "DELETE",
+//     headers: authHeaders(),
+//   });
+
+//   if (!res.ok) {
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+//     const result = await res.json();
+//     throw new Error(result.detail || "Delete failed");
+//   }
+//   return true;
+// }
+
+// /* --------------------  UPDATE CURRENT USER PROFILE  -------------------- */
+// export async function updateCurrentUserProfile(data) {
+//   const res = await fetch(`${API_URL}/auth/me`, {
+//     method: "PUT",
+//     headers: authHeaders(),
+//     body: JSON.stringify(data),
+//   });
+
+//   const result = await res.json();
+//   if (!res.ok) {
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+//     throw new Error(result.detail || "Profile update failed");
+//   }
+//   return result;
+// }
+
+// /* --------------------  GET USERS BY ROLE  -------------------- */
+// export async function getUsersByRole(role) {
+//   const organizationId = getOrganizationId();
+  
+//   const res = await fetch(`${API_URL}/users/?role=${role}&organization_id=${organizationId}`, {
+//     headers: authHeaders(),
+//   });
+
+//   const result = await res.json();
+//   if (!res.ok) {
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+//     throw new Error(result.detail || "Failed to load users");
+//   }
+//   return result;
+// }
+
+// /* --------------------  SEARCH USERS  -------------------- */
+// export async function searchUsers(query) {
+//   const organizationId = getOrganizationId();
+  
+//   const res = await fetch(`${API_URL}/users/search?q=${encodeURIComponent(query)}&organization_id=${organizationId}`, {
+//     headers: authHeaders(),
+//   });
+
+//   const result = await res.json();
+//   if (!res.ok) {
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+//     throw new Error(result.detail || "Failed to search users");
+//   }
+//   return result;
+// }
+
+
+
+// /* -----------  GET ORG-SCOPED USERS (ADMIN DASHBOARD)  ----------- */
+// export async function getallUsers() {
+//   const res = await fetch(`${API_URL}/users/dashboard/members`, {
+//     headers: authHeaders(),
+//   });
+
+//   const result = await res.json();
+//   if (!res.ok) {
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+//     throw new Error(result.detail || "Failed to load users");
+//   }
+//   return result;
+// }
+
+
+
+
+
+// /* --------------------  GET USERS (Member-Safe Version)  -------------------- */
+// export async function getUsersSafe() {
+//   try {
+//     const res = await fetch(`${API_URL}/users/`, {
+//       headers: authHeaders(),
+//     });
+
+//     if (res.status === 403) {
+//       // Member not allowed to access full user list
+//       return [];
+//     }
+
+//     const result = await res.json();
+//     if (!res.ok) {
+//       throw new Error(result.detail || "Failed to load users");
+//     }
+//     return result;
+//   } catch (error) {
+//     console.warn("⚠️ Member-safe getUsers failed:", error.message);
+//     return [];
+//   }
+// }
+
+
+
+
+
+
+// /* --------------------  UPDATE TASK STATUS (for drag-drop)  -------------------- */
+// export async function updateTaskStatus(taskId, newStatus) {
+//   const organizationId = getOrganizationId();
+
+//   const res = await fetch(`$${API_URL}/tasks/ $${taskId}`, {
+//     method: "PUT",
+//     headers: authHeaders(),
+//     body: JSON.stringify({
+//       status: newStatus,
+//       organization_id: organizationId,
+//     }),
+//   });
+
+//   const result = await res.json();
+
+//   if (!res.ok) {
+//     if (res.status === 401 || res.status === 403) {
+//       localStorage.removeItem("token");
+//       localStorage.removeItem("user");
+//       localStorage.removeItem("organizationId");
+//       window.location.href = "/login";
+//     }
+//     throw new Error(result.detail || "Failed to update task status");
+//   }
+
+//   return result; // Returns updated task
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 // src/api/users.js
 import { API_URL } from "../config/apiConfig";
 console.log(API_URL);
@@ -39,10 +352,9 @@ export async function getCurrentUser() {
   return result;
 }
 
-
 /* -----------  GET ORG-SCOPED USERS (ADMIN DASHBOARD)  ----------- */
 export async function getUsers() {
-  const res = await fetch(`${API_URL}/users/`, {   // <- clean URL
+  const res = await fetch(`${API_URL}/users/`, {
     headers: authHeaders(),
   });
 
@@ -56,11 +368,10 @@ export async function getUsers() {
       window.location.href = "/login";
     } else if (res.status === 403) {
       // Forbidden → member not allowed to access this resource
-      // Silently handle 403 for members to prevent console errors
       if (import.meta.env.DEV || import.meta.env.NODE_ENV === "development") {
         console.info("Member access restricted (403) — skipping users fetch.");
       }
-      return []; // Return empty list instead of forcing logout
+      return [];
     }
     throw new Error(result.detail || `Unexpected response: ${res.status}`);
   }
@@ -69,9 +380,7 @@ export async function getUsers() {
 
 /* --------------------  GET USER BY ID  -------------------- */
 export async function getUser(id) {
-  const organizationId = getOrganizationId();
-  
-  const res = await fetch(`${API_URL}/users/${id}?organization_id=${organizationId}`, {
+  const res = await fetch(`${API_URL}/users/${id}`, {
     headers: authHeaders(),
   });
 
@@ -96,18 +405,10 @@ export async function getUser(id) {
 
 /* --------------------  UPDATE USER  -------------------- */
 export async function updateUser(id, data) {
-  const organizationId = getOrganizationId();
-  
-  // Include organization_id to ensure user can only update their org's users
-  const userData = {
-    ...data,
-    organization_id: organizationId
-  };
-
   const res = await fetch(`${API_URL}/users/${id}`, {
     method: "PUT",
     headers: authHeaders(),
-    body: JSON.stringify(userData),
+    body: JSON.stringify(data),
   });
 
   const result = await res.json();
@@ -124,10 +425,11 @@ export async function updateUser(id, data) {
 }
 
 /* --------------------  DELETE USER  -------------------- */
-export async function deleteUser(id) {
-  const organizationId = getOrganizationId();
-  
-  const res = await fetch(`${API_URL}/users/${id}?organization_id=${organizationId}`, {
+// Add to src/api/users.js
+
+/* --------------------  DELETE USER (Super Admin Only)  -------------------- */
+export async function deleteUser(userId) {
+  const res = await fetch(`${API_URL}/users/${userId}/permanent`, {
     method: "DELETE",
     headers: authHeaders(),
   });
@@ -139,15 +441,86 @@ export async function deleteUser(id) {
       localStorage.removeItem("organizationId");
       window.location.href = "/login";
     }
+    
     const result = await res.json();
-    throw new Error(result.detail || "Delete failed");
+    throw new Error(result.detail || "Failed to delete user");
   }
-  return true;
+  
+  const result = await res.json();
+  return result;
 }
+
+/* --------------------  REMOVE MEMBER FROM ORGANIZATION  -------------------- */
+// In your API file (users.js or similar)
+export const removeMemberFromOrganization = async (userId) => {
+  try {
+    const token = localStorage.getItem('token');
+    
+    const response = await fetch(`${API_URL}/auth/members/${userId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.detail || "Failed to remove member");
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`❌ Error deleting member ${userId}:`, error);
+    throw error;
+  }
+};
+
+
+// In your API function that handles member deletion
+export const deleteOrganizationMember = async (memberId) => {
+  try {
+    const token = localStorage.getItem('token');
+    const currentUserId = parseInt(localStorage.getItem('userId'));
+    
+    // Prevent user from deleting themselves
+    if (memberId === currentUserId) {
+      throw new Error("You cannot delete your own account");
+    }
+
+    const response = await fetch(`${API_URL}/auth/members/${memberId}`, {
+      method: 'DELETE',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      
+      // Handle specific error cases
+      if (response.status === 400) {
+        throw new Error(errorData.detail || "Cannot delete this user. They may be the organization owner.");
+      } else if (response.status === 404) {
+        throw new Error("User not found or already deleted");
+      } else if (response.status === 500) {
+        throw new Error("Cannot delete user who owns projects. Please transfer project ownership first.");
+      } else {
+        throw new Error(errorData.detail || `Failed to delete member: ${response.status}`);
+      }
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error(`❌ Error deleting member ${memberId}:`, error);
+    throw error;
+  }
+};
 
 /* --------------------  UPDATE CURRENT USER PROFILE  -------------------- */
 export async function updateCurrentUserProfile(data) {
-  const res = await fetch(`${API_URL}/auth/me`, {
+  const res = await fetch(`${API_URL}/users/me`, {
     method: "PUT",
     headers: authHeaders(),
     body: JSON.stringify(data),
@@ -166,11 +539,9 @@ export async function updateCurrentUserProfile(data) {
   return result;
 }
 
-/* --------------------  GET USERS BY ROLE  -------------------- */
-export async function getUsersByRole(role) {
-  const organizationId = getOrganizationId();
-  
-  const res = await fetch(`${API_URL}/users/?role=${role}&organization_id=${organizationId}`, {
+/* --------------------  GET ORGANIZATION MEMBERS  -------------------- */
+export async function getOrganizationMembers() {
+  const res = await fetch(`${API_URL}/users/organization/members`, {
     headers: authHeaders(),
   });
 
@@ -182,56 +553,10 @@ export async function getUsersByRole(role) {
       localStorage.removeItem("organizationId");
       window.location.href = "/login";
     }
-    throw new Error(result.detail || "Failed to load users");
+    throw new Error(result.detail || "Failed to load organization members");
   }
   return result;
 }
-
-/* --------------------  SEARCH USERS  -------------------- */
-export async function searchUsers(query) {
-  const organizationId = getOrganizationId();
-  
-  const res = await fetch(`${API_URL}/users/search?q=${encodeURIComponent(query)}&organization_id=${organizationId}`, {
-    headers: authHeaders(),
-  });
-
-  const result = await res.json();
-  if (!res.ok) {
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("organizationId");
-      window.location.href = "/login";
-    }
-    throw new Error(result.detail || "Failed to search users");
-  }
-  return result;
-}
-
-
-
-/* -----------  GET ORG-SCOPED USERS (ADMIN DASHBOARD)  ----------- */
-export async function getallUsers() {
-  const res = await fetch(`${API_URL}/users/dashboard/members`, {
-    headers: authHeaders(),
-  });
-
-  const result = await res.json();
-  if (!res.ok) {
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("organizationId");
-      window.location.href = "/login";
-    }
-    throw new Error(result.detail || "Failed to load users");
-  }
-  return result;
-}
-
-
-
-
 
 /* --------------------  GET USERS (Member-Safe Version)  -------------------- */
 export async function getUsersSafe() {
@@ -254,37 +579,4 @@ export async function getUsersSafe() {
     console.warn("⚠️ Member-safe getUsers failed:", error.message);
     return [];
   }
-}
-
-
-
-
-
-
-/* --------------------  UPDATE TASK STATUS (for drag-drop)  -------------------- */
-export async function updateTaskStatus(taskId, newStatus) {
-  const organizationId = getOrganizationId();
-
-  const res = await fetch(`${API_URL}/tasks/${taskId}`, {
-    method: "PUT",
-    headers: authHeaders(),
-    body: JSON.stringify({
-      status: newStatus,
-      organization_id: organizationId,
-    }),
-  });
-
-  const result = await res.json();
-
-  if (!res.ok) {
-    if (res.status === 401 || res.status === 403) {
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
-      localStorage.removeItem("organizationId");
-      window.location.href = "/login";
-    }
-    throw new Error(result.detail || "Failed to update task status");
-  }
-
-  return result; // Returns updated task
 }

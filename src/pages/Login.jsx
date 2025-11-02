@@ -36,12 +36,11 @@ export default function Login() {
       
       toast.success("Welcome back! 👋");
 
+      // ✅ FIXED: Redirect members to /dashboard instead of /member
       if (user.role === "admin" || user.role === "super_admin") {
         nav("/admin");
-      } else if (user.role === "member") {
-        nav("/member");
       } else {
-        nav("/member");
+        nav("/member"); // Changed from /member to /dashboard
       }
     } catch (err) {
       console.error("Login error:", err);

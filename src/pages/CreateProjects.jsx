@@ -7,6 +7,7 @@ import ProjectModal from "../components/modals/ProjectModal.jsx"
 import ConfirmationModal from "../components/modals/ConfirmationModal.jsx";
 import toast from "react-hot-toast";
 
+
 export default function ProjectManagement() {
   const [projects, setProjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
@@ -168,7 +169,7 @@ export default function ProjectManagement() {
                 {projects.map((proj, idx) => (
                   <tr key={proj.id}>
                     <td>{idx + 1}</td>
-                    <td>{proj.name}</td>
+                    <td>{proj.title}</td>
                     <td>{proj.description}</td>
                     <td className="action-col">
                       <div className="project-actions">

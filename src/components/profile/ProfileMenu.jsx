@@ -1,8 +1,13 @@
-// src/components/ProfileMenu.jsx
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
-import { FiUser, FiHelpCircle, FiLogOut, FiChevronDown } from "react-icons/fi";
+import {
+  FiUser,
+  FiHelpCircle,
+  FiLogOut,
+  FiChevronDown,
+  FiCreditCard
+} from "react-icons/fi";
 import { toast } from "react-hot-toast";
 
 export default function ProfileMenu() {
@@ -11,44 +16,53 @@ export default function ProfileMenu() {
     fullName: "",
     email: "",
     initials: "",
-    role: ""
+    role: "",
+    isSuperAdmin: false
   });
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
-  // Get user data from localStorage
+  // Get user data from localStorage - FIXED: Read from correct sources
   useEffect(() => {
     const getUserData = () => {
       try {
-        const userRole = localStorage.getItem("userRole") || "";
-        const userName = localStorage.getItem("userName") || "";
-        const userEmail = localStorage.getItem("userEmail") || "";
+        // ✅ FIXED: Read from user object stored by AuthContext, not individual items
+        const storedUser = localStorage.getItem("user");
+        const userObj = storedUser ? JSON.parse(storedUser) : {};
         
+        const userRole = userObj.role || localStorage.getItem("userRole") || "";
+        const userName = userObj.full_name || userObj.name || localStorage.getItem("userName") || "User";
+        const userEmail = userObj.email || localStorage.getItem("userEmail") || "user@example.com";
+
+        // ✅ FIXED: Strict check - only "super_admin" can see Upgrade Plan
+        const isSuperAdmin = userRole === "super_admin";
+
         // Generate initials from full name
         const getInitials = (name) => {
           if (!name) return "U";
           return name
-            .split(' ')
-            .map(word => word.charAt(0))
-            .join('')
+            .split(" ")
+            .map((word) => word.charAt(0))
+            .join("")
             .toUpperCase()
             .slice(0, 2);
         };
 
         setUserData({
-          fullName: userName || "User",
-          email: userEmail || "user@example.com",
+          fullName: userName,
+          email: userEmail,
           initials: getInitials(userName),
-          role: userRole || "User"
+          role: userRole || "User",
+          isSuperAdmin: isSuperAdmin
         });
       } catch (error) {
         console.error("Error loading user data:", error);
-        // Fallback data
         setUserData({
           fullName: "User",
           email: "user@example.com",
           initials: "U",
-          role: "User"
+          role: "User",
+          isSuperAdmin: false
         });
       }
     };
@@ -75,8 +89,13 @@ export default function ProfileMenu() {
     setIsOpen(false);
   };
 
+  const handleUpgradeClick = () => {
+    navigate("/plans");
+    setIsOpen(false);
+  };
+
   const handleHelpClick = () => {
-    navigate("/support");  // Navigate to Help & Support page
+    navigate("/support");
     setIsOpen(false);
   };
 
@@ -116,22 +135,19 @@ export default function ProfileMenu() {
   return (
     <div className="profile-menu-container" ref={menuRef}>
       {/* Profile Button */}
-      <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="profile-button"
-      >
+      <button onClick={() => setIsOpen(!isOpen)} className="profile-button">
         <div className="profile-avatar">
           <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-semibold">
             {userData.initials}
           </div>
         </div>
-        
+
         <div className="profile-info">
           <span className="profile-name">{userData.fullName}</span>
           <span className="profile-email">{userData.email}</span>
         </div>
-        
-        <motion.div 
+
+        <motion.div
           className="profile-arrow"
           variants={iconVariants}
           animate={isOpen ? "open" : "closed"}
@@ -161,26 +177,32 @@ export default function ProfileMenu() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="profile-name">{userData.fullName}</div>
-                  <div className="profile-email">{userData.role}</div>
+                  <div className="profile-email">
+                    {userData.role}
+                    {userData.isSuperAdmin && (
+                      <span className="admin-badge"> • Admin</span>
+                    )}
+                  </div>
                 </div>
               </div>
-              <div className="text-xs text-slate-400">{userData.email}</div>
             </div>
 
             {/* Menu Items */}
             <div className="dropdown-items">
-              <button
-                onClick={handleProfileClick}
-                className="dropdown-item"
-              >
+              <button onClick={handleProfileClick} className="dropdown-item">
                 <FiUser size={16} className="text-slate-400" />
                 <span>Profile & Settings</span>
               </button>
 
-              <button
-                onClick={handleHelpClick}
-                className="dropdown-item"
-              >
+              {/* ✅ FIXED: Only show Upgrade Plan for super admins */}
+              {userData.isSuperAdmin && (
+                <button onClick={handleUpgradeClick} className="dropdown-item">
+                  <FiCreditCard size={16} className="text-slate-400" />
+                  <span>Upgrade Plan</span>
+                </button>
+              )}
+
+              <button onClick={handleHelpClick} className="dropdown-item">
                 <FiHelpCircle size={16} className="text-slate-400" />
                 <span>Help & Support</span>
               </button>

@@ -1,13 +1,13 @@
+
 // src/components/Kanban.jsx
 import React, { useState, useEffect, forwardRef, useImperativeHandle } from "react";
 import TaskCard from "./TaskCard";
 import TaskModal from "./modals/TaskModal";
 import ConfirmationModal from "./modals/ConfirmationModal.jsx";
-import { openViewTaskModal } from "../components/ViewTask.jsx"; 
-import { getTasks, createTask, updateTask, deleteTask } from "../api/tasks.js";
-import { getUsers, updateTaskStatus } from "../api/users.js";
+import { openViewTaskModal } from "./ViewTask.jsx"; 
+import { getTasks, createTask, updateTask, deleteTask, updateTaskStatusOnly } from "../api/tasks.js";
+import { getUsers } from "../api/users.js";
 import { getProjects } from "../api/projects.js";
-import { updateTaskStatusOnly } from "../api/tasks.js";
 import { refreshDashboardData } from "../api/getMembers";
 import { useDashboard } from "../context/DashboardContext";
 
@@ -22,7 +22,7 @@ const Kanban = forwardRef((props, ref) => {
   const [loadingDependencies, setLoadingDependencies] = useState(true);
   const [draggedTask, setDraggedTask] = useState(null);
   
-  //  Unified modal state
+  // Unified modal state
   const [selectedTask, setSelectedTask] = useState(null);
   const [modalMode, setModalMode] = useState('edit'); // 'edit' or 'view'
   const [showTaskModal, setShowTaskModal] = useState(false);
@@ -38,24 +38,23 @@ const Kanban = forwardRef((props, ref) => {
   const adminName = localStorage.getItem("userName") || "Admin";
 
   const statusMap = {
-  open: "Open",
-  todo: "To Do",
-  "inprogress": "In Progress",
-  "in-progress": "In Progress",
-  qa: "In QA",
-  inqa: "In QA",             // ← ADD THIS
-  "in_qa": "In QA",          // ← ADD THIS
-  done: "Done",
-};
+    open: "Open",
+    todo: "To Do",
+    "inprogress": "In Progress",
+    "in-progress": "In Progress",
+    qa: "In QA",
+    inqa: "In QA",
+    "in_qa": "In QA",
+    done: "Done",
+  };
 
   const reverseStatusMap = {
-  "Open": "open",
-  "To Do": "todo",
-  "In Progress": "in-progress",
-  "In QA": "in_qa",   // ← was "qa", should match backend exactly
-  "Done": "done",
-};
-
+    "Open": "open",
+    "To Do": "todo",
+    "In Progress": "in-progress",
+    "In QA": "in_qa",
+    "Done": "done",
+  };
 
   const loadTasks = async () => {
     if (projects.length === 0 || users.length === 0) return;
@@ -72,7 +71,7 @@ const Kanban = forwardRef((props, ref) => {
         return {
           ...t,
           status: statusMap[t.status?.toLowerCase().replace(/[-\s]/g, "")] || "Open",
-          project_name: project?.name || "Unknown Project",
+          project_name: project?.title || "Unknown Project",
           members: members,
           created_by_name: adminName,
         };
@@ -130,7 +129,7 @@ const Kanban = forwardRef((props, ref) => {
     }
   }, [loadingDependencies, projects, users]);
 
-  //  Open modal for creating or editing
+  // Open modal for creating or editing
   const openEditModal = (col = "Open", task = null) => {
     if (loadingDependencies) {
       toast.error("Loading team members and projects...");
@@ -145,7 +144,7 @@ const Kanban = forwardRef((props, ref) => {
     setShowTaskModal(true);
   };
 
-  // ✅ Open modal for viewing (uses your new utility)
+  // Open modal for viewing (uses your new utility)
   const viewTask = (task) => {
     openViewTaskModal(
       task,
@@ -166,64 +165,62 @@ const Kanban = forwardRef((props, ref) => {
     setSelectedTask(null);
   };
 
-
   const saveTask = async (payload) => {
-  try {
-    const backendStatus = reverseStatusMap[payload.status] || payload.status.toLowerCase().replace(/ /g, "-");
-    const taskPayload = { ...payload, status: backendStatus };
+    try {
+      const backendStatus = reverseStatusMap[payload.status] || payload.status.toLowerCase().replace(/ /g, "-");
+      const taskPayload = { ...payload, status: backendStatus };
 
-    // Remove undefined and empty fields
-    Object.keys(taskPayload).forEach(
-      key => taskPayload[key] === undefined && delete taskPayload[key]
-    );
+      // Remove undefined and empty fields
+      Object.keys(taskPayload).forEach(
+        key => taskPayload[key] === undefined && delete taskPayload[key]
+      );
 
-    // Members: only send status if allow_member_edit = false
-    const userRole = localStorage.getItem("userRole") || "";
-    if (userRole === "MEMBER" && !payload.allow_member_edit) {
-      // Send only status
-      const statusOnlyPayload = { status: backendStatus };
-      const updated = await updateTask(payload.id, statusOnlyPayload);
-      toast.success("Task status updated successfully!");
+      // Members: only send status if allow_member_edit = false
+      const userRole = localStorage.getItem("userRole") || "";
+      if (userRole === "MEMBER" && !payload.allow_member_edit) {
+        // Send only status
+        const statusOnlyPayload = { status: backendStatus };
+        const updated = await updateTask(payload.id, statusOnlyPayload);
+        toast.success("Task status updated successfully!");
+        closeTaskModal();
+        loadTasks();
+        return;
+      }
+
+      // Admin or editable members
+      let updatedTask;
+      if (payload.id) {
+        updatedTask = await updateTask(payload.id, taskPayload);
+        toast.success("Task updated successfully!");
+      } else {
+        updatedTask = await createTask(taskPayload);
+        toast.success("Task created successfully!");
+      }
+
+      const project = projects.find(p => p.id === updatedTask.project_id);
+      const members = updatedTask.member_ids?.map(id => users.find(u => u.id === id)).filter(Boolean) || [];
+      const statusKey = updatedTask.status.toLowerCase().replace(/[-\s]/g, "");
+      const displayStatus = statusMap[statusKey] || "Open";
+
+      const normalizedTask = {
+        ...updatedTask,
+        status: displayStatus,
+        project_name: project?.title || "Unknown Project",
+        members,
+        created_by_name: adminName,
+      };
+
+      setTasks(prev => payload.id
+        ? prev.map(t => t.id === payload.id ? normalizedTask : t)
+        : [...prev, normalizedTask]
+      );
+
       closeTaskModal();
-      loadTasks();
-      return;
+    } catch (e) {
+      console.error("Save task error:", e);
+      toast.error(e.message || "Task operation failed");
     }
-
-    // Admin or editable members
-    let updatedTask;
-    if (payload.id) {
-      updatedTask = await updateTask(payload.id, taskPayload);
-      toast.success("Task updated successfully!");
-    } else {
-      updatedTask = await createTask(taskPayload);
-      toast.success("Task created successfully!");
-    }
-
-    const project = projects.find(p => p.id === updatedTask.project_id);
-    const members = updatedTask.member_ids?.map(id => users.find(u => u.id === id)).filter(Boolean) || [];
-    const statusKey = updatedTask.status.toLowerCase().replace(/[-\s]/g, "");
-    const displayStatus = statusMap[statusKey] || "Open";
-
-    const normalizedTask = {
-      ...updatedTask,
-      status: displayStatus,
-      project_name: project?.name || "Unknown Project",
-      members,
-      created_by_name: adminName,
-    };
-
-    setTasks(prev => payload.id
-      ? prev.map(t => t.id === payload.id ? normalizedTask : t)
-      : [...prev, normalizedTask]
-    );
-
-    closeTaskModal();
-  } catch (e) {
-    console.error("Save task error:", e);
-    toast.error(e.message || "Task operation failed");
-  }
-};
-
+  };
 
   const editTask = (task) => openEditModal(task.status, task);
 
@@ -244,7 +241,7 @@ const Kanban = forwardRef((props, ref) => {
     setShowConfirmation(true);
   };
 
-  // Drag and Drop Handlers (unchanged)
+  // Drag and Drop Handlers
   const handleDragStart = (task) => setDraggedTask(task);
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -254,40 +251,39 @@ const Kanban = forwardRef((props, ref) => {
     e.currentTarget.classList.remove('drag-over');
   };
 
-const handleDrop = async (e, newStatus) => {
-  e.preventDefault();
-  e.currentTarget.classList.remove('drag-over');
+  const handleDrop = async (e, newStatus) => {
+    e.preventDefault();
+    e.currentTarget.classList.remove('drag-over');
 
-  if (!draggedTask || draggedTask.status === newStatus) {
-    setDraggedTask(null);
-    return;
-  }
-
-  try {
-    // 🔹 Step 1: Update backend (your existing helper)
-    await updateTaskStatusOnly(draggedTask.id, reverseStatusMap[newStatus]);
-
-    // 🔹 Step 2: Update frontend instantly
-    setTasks(prev =>
-      prev.map(t => (t.id === draggedTask.id ? { ...t, status: newStatus } : t))
-    );
-    toast.success(`Task moved to ${newStatus}`);
-
-    // 🔹 Step 3: (New) Refresh Admin Dashboard + Reports data
-    try {
-      await refreshDashboardData();
-      console.log("✅ Dashboard & reports data refreshed");
-    } catch (refreshErr) {
-      console.warn("⚠️ Dashboard refresh skipped:", refreshErr);
+    if (!draggedTask || draggedTask.status === newStatus) {
+      setDraggedTask(null);
+      return;
     }
 
-  } catch (err) {
-    toast.error(err.message || "Failed to move task");
-  } finally {
-    setDraggedTask(null);
-  }
-};
+    try {
+      // Update backend
+      await updateTaskStatusOnly(draggedTask.id, reverseStatusMap[newStatus]);
 
+      // Update frontend instantly
+      setTasks(prev =>
+        prev.map(t => (t.id === draggedTask.id ? { ...t, status: newStatus } : t))
+      );
+      toast.success(`Task moved to ${newStatus}`);
+
+      // Refresh Admin Dashboard + Reports data
+      try {
+        await refreshDashboardData();
+        console.log("✅ Dashboard & reports data refreshed");
+      } catch (refreshErr) {
+        console.warn("⚠️ Dashboard refresh skipped:", refreshErr);
+      }
+
+    } catch (err) {
+      toast.error(err.message || "Failed to move task");
+    } finally {
+      setDraggedTask(null);
+    }
+  };
 
   return (
     <div className="kanban-board">
@@ -298,7 +294,7 @@ const handleDrop = async (e, newStatus) => {
             title={col}
             tasks={tasks.filter((t) => t.status === col)}
             onAdd={() => openEditModal(col)}
-            onView={viewTask}       // ✅ Now uses the new function
+            onView={viewTask}
             onEdit={editTask}
             onDelete={removeTask}
             onDragStart={handleDragStart}
@@ -311,7 +307,7 @@ const handleDrop = async (e, newStatus) => {
         ))}
       </div>
 
-      {/* ✅ Unified TaskModal */}
+      {/* Unified TaskModal */}
       {showTaskModal && (
         <TaskModal
           onClose={closeTaskModal}
@@ -320,7 +316,7 @@ const handleDrop = async (e, newStatus) => {
           column={selectedTask?.status || "Open"}
           projects={projects}
           users={users}
-          viewOnly={modalMode === 'view'} // ✅ Controls view/edit mode
+          viewOnly={modalMode === 'view'}
         />
       )}
 

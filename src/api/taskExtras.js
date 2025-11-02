@@ -1,21 +1,16 @@
-// src/api/taskExtras.js
+// src/api/taskExtras.js - FIXED endpoints
 import { API_URL } from "../config/apiConfig";
-console.log(API_URL);
 
 function authHeaders() {
   const token = localStorage.getItem("token");
-  if (!token) throw new Error("No token found");
+  if (!token) {
+    console.warn("⚠️ No token found in localStorage");
+    throw new Error("No token found");
+  }
   return {
     "Content-Type": "application/json",
     Authorization: `Bearer ${token}`,
   };
-}
-
-function handleUnauthorized(res) {
-  if (res.status === 401) {
-    localStorage.clear();
-    window.location.href = "/login";
-  }
 }
 
 /* --------------------  TASK COMMENTS  -------------------- */
@@ -26,7 +21,10 @@ export async function fetchTaskComments(taskId) {
     });
 
     if (!res.ok) {
-      handleUnauthorized(res);
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
       const result = await res.json();
       return { ok: false, error: result.detail || "Failed to fetch comments" };
     }
@@ -47,7 +45,10 @@ export async function postTaskComment(taskId, message) {
     });
 
     if (!res.ok) {
-      handleUnauthorized(res);
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
       const result = await res.json();
       return { ok: false, error: result.detail || "Failed to post comment" };
     }
@@ -67,7 +68,10 @@ export async function fetchTaskWorkLogs(taskId) {
     });
 
     if (!res.ok) {
-      handleUnauthorized(res);
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
       const result = await res.json();
       return { ok: false, error: result.detail || "Failed to fetch work logs" };
     }
@@ -83,9 +87,18 @@ export async function postTaskWorkLog(taskId, logData) {
   try {
     const payload = {
       hours: parseFloat(logData.hours),
-      description: logData.description || null,
-      date: logData.date ? new Date(logData.date).toISOString() : null,
+      description: logData.description || "",
     };
+
+    // Handle date - only include if provided and valid
+    if (logData.date && logData.date !== "") {
+      const dateObj = new Date(logData.date);
+      if (!isNaN(dateObj.getTime())) {
+        payload.date = dateObj.toISOString();
+      }
+    }
+
+    console.log("📤 Sending worklog payload:", payload);
 
     const res = await fetch(`${API_URL}/tasks/${taskId}/worklogs`, {
       method: 'POST',
@@ -93,38 +106,60 @@ export async function postTaskWorkLog(taskId, logData) {
       body: JSON.stringify(payload),
     });
 
+    const result = await res.json();
+
     if (!res.ok) {
-      handleUnauthorized(res);
-      const result = await res.json();
-      return { ok: false, error: result.detail || "Failed to log work" };
+      console.error("❌ Worklog API Error Details:", result);
+      
+      let errorMessage = 'Failed to log work';
+      if (result && typeof result === 'object') {
+        if (Array.isArray(result.detail)) {
+          errorMessage = result.detail.map(err => {
+            const field = err.loc?.join('.') || 'unknown';
+            return `${field}: ${err.msg}`;
+          }).join(', ');
+        } else if (result.detail) {
+          errorMessage = result.detail;
+        } else {
+          errorMessage = JSON.stringify(result);
+        }
+      }
+
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
+      
+      return { ok: false, error: errorMessage };
     }
 
-    const data = await res.json();
-    return { ok: true, data };
+    return { ok: true, data: result };
   } catch (error) {
+    console.error("❌ Worklog fetch error:", error);
     return { ok: false, error: error.message || "Failed to log work" };
   }
 }
 
-/* --------------------  TASK PERMISSION TOGGLE  -------------------- */
-export async function toggleTaskPermission(taskId, allowMemberEdit) {
+/* --------------------  DELETE TASK WORK LOG  -------------------- */
+export async function deleteTaskWorkLog(worklogId) {
   try {
-    const res = await fetch(`${API_URL}/tasks/${taskId}/permission`, {
-      method: 'PATCH',
+    // ✅ FIXED: Correct endpoint path
+    const res = await fetch(`${API_URL}/tasks/worklogs/${worklogId}`, {
+      method: 'DELETE',
       headers: authHeaders(),
-      body: JSON.stringify({ allow_member_edit: allowMemberEdit }),
     });
 
     if (!res.ok) {
-      handleUnauthorized(res);
+      if (res.status === 401) {
+        localStorage.clear();
+        window.location.href = "/login";
+      }
       const result = await res.json();
-      return { ok: false, error: result.detail || "Failed to update permission" };
+      return { ok: false, error: result.detail || "Failed to delete work log" };
     }
 
-    const data = await res.json();
-    return { ok: true, data };
+    return { ok: true };
   } catch (error) {
-    return { ok: false, error: error.message || "Failed to update permission" };
+    return { ok: false, error: error.message || "Failed to delete work log" };
   }
 }
-

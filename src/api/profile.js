@@ -1,5 +1,6 @@
 // src/api/profile.js
 import { API_URL } from "../config/apiConfig";
+console.log(API_URL);
 
 /* ============================================================
    ✅ Get My Profile

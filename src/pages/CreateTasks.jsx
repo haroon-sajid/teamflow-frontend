@@ -2,6 +2,8 @@ import Layout from "../components/Layout";
 import Header from "../components/Header.jsx";
 import Kanban from "../components/Kanban";
 import { useRef } from "react";
+import "../styles/CreateTasks.module.css"; 
+
 
 export default function CreateTaskPage() {
   const kanbanRef = useRef();

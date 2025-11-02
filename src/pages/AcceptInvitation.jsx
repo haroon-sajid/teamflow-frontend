@@ -1,242 +1,253 @@
-// src/pages/AcceptInvitation.jsx
-import { useState, useEffect } from "react";
-import { useSearchParams, useNavigate } from "react-router-dom";
-import { toast } from "react-hot-toast";
-import { validateInvitationToken, acceptInvitation } from "../api/auth"; // or "../api/invitation"
+// src/components/AcceptInvitation.jsx
+import React, { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { validateInvitation, acceptInvitation } from "../api/invitation.js";
+import toast from "react-hot-toast";
+import styles from "../styles/acceptinvite.module.css"; // ✅ FIXED: Import as styles object
 
-export default function AcceptInvitation() {
+const AcceptInvitation = () => {
+  console.log("🎯 ACCEPT INVITATION COMPONENT IS LOADING!");
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  // const token = searchParams.get("token");
   const token = searchParams.get("token");
-  console.log("🔍 Raw token from URL:", token); // ADD THIS
-  
-  const [invitation, setInvitation] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [validating, setValidating] = useState(true);
+
+  const [loading, setLoading] = useState(true);
+  const [valid, setValid] = useState(false);
+  const [invitationData, setInvitationData] = useState(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({ 
-    full_name: "", 
-    password: "" 
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    full_name: "",
+    password: "",
+    confirmPassword: "",
   });
 
   useEffect(() => {
-    if (token) {
-      validateToken();
-    } else {
-      toast.error("No invitation token provided");
-      navigate("/login");
-    }
-  }, [token]);
+    const validateToken = async () => {
+      if (!token) {
+        toast.error("Invalid invitation link");
+        setLoading(false);
+        return;
+      }
 
-  const validateToken = async () => {
-    setValidating(true);
-    try {
-      const result = await validateInvitationToken(token);
-      setInvitation(result);
-      toast.success("Invitation validated successfully!");
-    } catch (error) {
-      console.error("Token validation error:", error);
-      toast.error(error.message || "Invalid or expired invitation link");
-      setTimeout(() => navigate("/login"), 2000);
-    } finally {
-      setValidating(false);
-    }
-  };
+      try {
+        const result = await validateInvitation(token);
+        setValid(true);
+        setInvitationData(result);
+        setLoading(false);
+      } catch (error) {
+        toast.error(error.message);
+        setLoading(false);
+        setTimeout(() => navigate("/login"), 2000);
+      }
+    };
 
+    validateToken();
+  }, [token, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (formData.password.length < 8) {
-      toast.error("Password must be at least 8 characters");
+    if (formData.password !== formData.confirmPassword) {
+      toast.error("Passwords do not match");
       return;
     }
 
-    if (!formData.full_name.trim()) {
-      toast.error("Please enter your full name");
+    if (formData.password.length < 6) {
+      toast.error("Password must be at least 6 characters long");
       return;
     }
-
-    setLoading(true);
 
     try {
       const result = await acceptInvitation({
-        token: token,
-        full_name: formData.full_name.trim(),
-        password: formData.password
+        token,
+        full_name: formData.full_name,
+        password: formData.password,
       });
 
-      if (result.access_token) {
-        localStorage.setItem("token", result.access_token);
+      // Store user data and token
+      localStorage.setItem("token", result.access_token);
+      localStorage.setItem("user", JSON.stringify(result.user));
+      if (result.user.organization_id) {
+        localStorage.setItem("organizationId", result.user.organization_id.toString());
       }
+
+      toast.success("Account activated successfully! Welcome to TeamFlow!");
       
-      if (result.user) {
-        localStorage.setItem("user", JSON.stringify(result.user));
-        localStorage.setItem("userName", result.user.full_name || result.user.email.split('@')[0]);
-        localStorage.setItem("userRole", result.user.role);
-        
-        if (result.user.organization_id) {
-          localStorage.setItem("organizationId", result.user.organization_id);
-        }
+      // ✅ FIXED: Redirect members to /dashboard instead of /member
+      if (result.user.role === "admin" || result.user.role === "super_admin") {
+        navigate("/admin");
+      } else {
+        navigate("/member"); 
       }
-      
-      toast.success("Welcome to TeamFlow! 🎉");
-      
-      setTimeout(() => {
-        if (result.user.role === "admin" || result.user.role === "super_admin") {
-          navigate("/admin");
-        } else {
-          navigate("/member");
-        }
-      }, 1000);
-      
     } catch (error) {
-      console.error("Accept invitation error:", error);
-      toast.error(error.message || "Failed to accept invitation");
-    } finally {
-      setLoading(false);
+      toast.error(error.message);
     }
   };
 
-  // Validating State
-  if (validating) {
+  if (loading) {
     return (
-      <div className="auth-card">
-        <div className="status-icon loading">
-          <div className="spinner"></div>
-        </div>
-        <h2 className="auth-title">Validating Invitation</h2>
-        <p className="auth-subtitle">
-          Please wait while we verify your invitation...
-        </p>
-      </div>
-    );
-  }
-
-  // Invalid Invitation State
-  if (!invitation) {
-    return (
-      <div className="auth-card">
-        <div className="status-icon error">
-          ❌
-        </div>
-        <h2 className="auth-title">Invalid Invitation</h2>
-        <p className="auth-subtitle">
-          The invitation link is invalid or has expired.
-        </p>
-        <button 
-          className="auth-btn"
-          onClick={() => navigate("/login")}
-        >
-          Go to Login
-        </button>
-      </div>
-    );
-  }
-
-  // Main Form
-  return (
-    <div className="auth-card">
-      {/* Brand Logo */}
-      <div className="auth-brand">
-        <div className="auth-logo">
-          <span className="auth-logo-text">TF</span>
-        </div>
-      </div>
-
-      {/* Success Icon */}
-      <div className="status-icon success">
-        ✓
-      </div>
-
-      {/* Title & Subtitle */}
-      <h2 className="auth-title">Accept Invitation</h2>
-      <p className="auth-subtitle">
-        You've been invited to join as <strong>{invitation.role}</strong>
-        <br />
-        <span style={{color: '#94a3b8', fontSize: '0.875rem'}}>{invitation.email}</span>
-      </p>
-
-      {/* Form */}
-      <form onSubmit={handleSubmit} className="auth-form">
-        <div>
-          <label className="auth-label">
-            <span className="auth-label-icon">👤</span>
-            Full Name
-          </label>
-          <input
-            type="text"
-            name="full_name"
-            value={formData.full_name}
-            onChange={(e) => setFormData({...formData, full_name: e.target.value})}
-            required
-            placeholder="Enter your full name"
-            className="auth-input"
-            disabled={loading}
-          />
-        </div>
-
-        <div>
-          <label className="auth-label">
-            <span className="auth-label-icon">🔒</span>
-            Password
-          </label>
-          <div className="pw-wrapper">
-            <input
-              type={showPassword ? "text" : "password"}
-              name="password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-              required
-              placeholder="Create a strong password"
-              minLength={8}
-              className="auth-input"
-              disabled={loading}
-            />
-            <span 
-              className="pw-eye" 
-              onClick={() => setShowPassword(!showPassword)}
-              role="button"
-              aria-label="Toggle password visibility"
-            >
-              {showPassword ? (
-                <svg className="pw-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              ) : (
-                <svg className="pw-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                </svg>
-              )}
-            </span>
+      <div className={styles["accept-invite-container"]}>
+        <div className={styles["invite-loading"]}>
+          <div className={styles["invite-brand"]}>
+            <div className={styles["invite-logo"]}>
+              <span className={styles["invite-logo-text"]}>T</span>
+            </div>
           </div>
-          <p className="helper-text">
-            <span className="helper-text-icon">ℹ️</span>
-            Password must be at least 8 characters
+          <div className={styles["invite-loading-spinner"]}></div>
+          <p className={styles["invite-loading-text"]}>Validating your invitation...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!valid) {
+    return (
+      <div className={styles["accept-invite-container"]}>
+        <div className={styles["invite-invalid"]}>
+          <div className={styles["invite-brand"]}>
+            <div className={styles["invite-logo"]}>
+              <span className={styles["invite-logo-text"]}>T</span>
+            </div>
+          </div>
+          <div className={styles["invite-invalid-icon"]}>❌</div>
+          <h1 className={styles["invite-invalid-title"]}>Invalid Invitation</h1>
+          <p className={styles["invite-invalid-text"]}>
+            This invitation link is invalid or has expired.
           </p>
+          <button
+            onClick={() => navigate("/login")}
+            className={styles["invite-invalid-btn"]}
+          >
+            Go to Login
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className={styles["accept-invite-container"]}>
+      <div className={styles["invite-card"]}>
+        {/* Branding */}
+        <div className={styles["invite-brand"]}>
+          <div className={styles["invite-logo"]}>
+            <span className={styles["invite-logo-text"]}>T</span>
+          </div>
         </div>
 
-        <button 
-          type="submit" 
-          disabled={loading} 
-          className="auth-btn"
-        >
-          {loading ? "Creating Account..." : "Create Account & Join Team"}
-        </button>
-      </form>
+        {/* Header */}
+        <h1 className={styles["invite-title"]}>
+          Join {invitationData?.org_name || "the team"}
+        </h1>
+        <p className={styles["invite-subtitle"]}>
+          Complete your account setup
+        </p>
+        <p className={styles["invite-role"]}>
+          Role: {invitationData?.role}
+        </p>
 
-      {/* Footer */}
-      <p className="auth-footer">
-        Already have an account?{" "}
-        <button
-          onClick={() => navigate("/login")}
-          type="button"
-        >
-          Login here
-        </button>
-      </p>
+        {/* Form */}
+        <form className={styles["invite-form"]} onSubmit={handleSubmit}>
+          {/* Full Name Field */}
+          <div>
+            <label htmlFor="full_name" className={styles["invite-label"]}>
+              <span className={styles["invite-label-icon"]}>👤</span>
+              Full Name
+            </label>
+            <input
+              id="full_name"
+              name="full_name"
+              type="text"
+              required
+              value={formData.full_name}
+              onChange={(e) => setFormData({ ...formData, full_name: e.target.value })}
+              className={styles["invite-input"]}
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          {/* Password Field */}
+          <div>
+            <label htmlFor="password" className={styles["invite-label"]}>
+              <span className={styles["invite-label-icon"]}>🔒</span>
+              Password
+            </label>
+            <div className={styles["pw-wrapper"]}>
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? "text" : "password"}
+                required
+                value={formData.password}
+                onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                className={styles["invite-input"]}
+                placeholder="Enter your password"
+              />
+              <div 
+                className={styles["pw-eye"]}
+                onClick={() => setShowPassword(!showPassword)}
+              >
+                {showPassword ? (
+                  <svg className={styles["pw-icon"]} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                ) : (
+                  <svg className={styles["pw-icon"]} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Confirm Password Field */}
+          <div>
+            <label htmlFor="confirmPassword" className={styles["invite-label"]}>
+              <span className={styles["invite-label-icon"]}>🔒</span>
+              Confirm Password
+            </label>
+            <div className={styles["pw-wrapper"]}>
+              <input
+                id="confirmPassword"
+                name="confirmPassword"
+                type={showConfirmPassword ? "text" : "password"}
+                required
+                value={formData.confirmPassword}
+                onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
+                className={styles["invite-input"]}
+                placeholder="Confirm your password"
+              />
+              <div 
+                className={styles["pw-eye"]}
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              >
+                {showConfirmPassword ? (
+                  <svg className={styles["pw-icon"]} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                  </svg>
+                ) : (
+                  <svg className={styles["pw-icon"]} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                  </svg>
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* Submit Button */}
+          <button
+            type="submit"
+            className={styles["invite-btn"]}
+          >
+            Activate Account
+          </button>
+        </form>
+      </div>
     </div>
   );
-}
+};
+
+export default AcceptInvitation;

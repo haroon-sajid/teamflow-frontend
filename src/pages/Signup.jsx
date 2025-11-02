@@ -47,10 +47,11 @@ export default function Signup() {
 
       toast.success("Organization created successfully! 🎉");
 
+      // ✅ FIXED: Redirect new organization admins to /admin (not /dashboard)
       if (user.role === "admin" || user.role === "super_admin") {
-        nav("/admin");
+        nav("/admin"); // Organization creators go to admin dashboard
       } else {
-        nav("/member");
+        nav("/member"); // This case shouldn't happen for new signups
       }
     } catch (err) {
       console.error("Signup error:", err);
