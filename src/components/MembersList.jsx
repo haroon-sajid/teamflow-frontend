@@ -4,7 +4,7 @@ import { getOrganizationMembers, removeMemberFromOrganization } from '../api/use
 import { getCurrentUser } from '../api/auth';
 import ConfirmationModal from './modals/ConfirmationModal';
 import toast from 'react-hot-toast';
-import styles from "../styles/Memberlist.module.css";
+import styles from "../styles/MemberList.module.css";
 
 const MembersList = () => {
   const [members, setMembers] = useState([]);

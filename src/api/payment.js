@@ -149,38 +149,10 @@ export async function createCheckoutSession(priceId) {
   }
 }
 
+
 // ===============================================================
 // 4️⃣ SUBSCRIBE TO FREE PLAN (FIXED)
 // ===============================================================
-// export async function subscribeFreePlan() {
-//   try {
-//     console.log("🔄 Subscribing to free plan");
-
-//     const res = await axios.post(
-//       `${API_URL}/payments/subscribe-free`,
-//       {}, // ✅ CORRECT: Empty object for POST
-//       { 
-//         headers: getAuthHeaders(),
-//         timeout: 15000
-//       }
-//     );
-    
-//     console.log("✅ Free plan subscribed:", res.data);
-//     return res.data;
-//   } catch (err) {
-//     console.error("❌ Free plan subscription error:", err);
-    
-//     const errorMessage = err.response?.data?.detail || "Failed to subscribe to free plan.";
-    
-//     if (err.response?.status === 403) {
-//       throw new Error("Cannot switch to Free plan: You have too many members. Please remove some members first or upgrade to a higher plan.");
-//     } else {
-//       throw new Error(errorMessage);
-//     }
-//   }
-// }
-
-
 export async function subscribeFreePlan() {
   try {
     console.log("🔄 Subscribing to free plan");
