@@ -280,11 +280,6 @@ export async function assignMembersToTask(taskId, memberIds) {
 
 
 
-
-
-
-// In src/api/tasks.js - REPLACE the existing searchTasks function with this:
-
 /* --------------------  ADVANCED TASK SEARCH  -------------------- */
 export async function searchTasks(filters = {}) {
   try {
@@ -325,6 +320,17 @@ export async function searchTasks(filters = {}) {
     }
     
     const data = await res.json();
+    
+    // ✅ Optional: Log the new member_names field for verification
+    console.log('✅ Search successful. Tasks with member names:', 
+      data.map(task => ({
+        id: task.id,
+        title: task.title,
+        member_ids: task.member_ids,
+        member_names: task.member_names // ✅ Now available from backend
+      }))
+    );
+    
     return data;
   } catch (error) {
     console.error('searchTasks error:', error);
