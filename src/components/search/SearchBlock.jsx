@@ -1,6 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import styles from "../../styles/SearchBlock.module.css";
+import { getOrganizationMembers } from "../../api/users";
+
 
 const SearchBlock = ({ onSubmit, loading = false }) => {
   // State for all form fields
@@ -10,6 +12,21 @@ const SearchBlock = ({ onSubmit, loading = false }) => {
   const [status, setStatus] = useState('');
   const [assignedTo, setAssignedTo] = useState('');
   const [priority, setPriority] = useState('');
+  const [members, setMembers] = useState([]); // Add members state
+
+  // Fetch members on component mount
+  useEffect(() => {
+    const loadMembers = async () => {
+      try {
+        const membersData = await getOrganizationMembers();
+        setMembers(membersData);
+      } catch (error) {
+        console.error('Failed to load members:', error);
+      }
+    };
+    
+    loadMembers();
+  }, []);
 
   // Handle form submission
   const handleSubmit = (e) => {
@@ -90,7 +107,7 @@ const SearchBlock = ({ onSubmit, loading = false }) => {
 
         {/* Title Field with Search Icon */}
         <div className={styles.formGroup}>
-          <label className={styles.formLabel}>Title</label>
+          <label className={styles.formLabel}>Task Title</label>
           <div className={styles.searchInputWrapper}>
             <input
               type="text"
@@ -114,22 +131,29 @@ const SearchBlock = ({ onSubmit, loading = false }) => {
             onChange={(e) => setStatus(e.target.value)}
           >
             <option value="">Select</option>
-            <option value="Open">Open</option>
-            <option value="In Progress">In Progress</option>
-            <option value="Completed">Completed</option>
+            <option value="open">Open</option>
+            <option value="todo">To Do</option>
+            <option value="in-progress">In Progress</option>
+            <option value="in_qa">In QA</option>
+            <option value="done">Done</option>
           </select>
         </div>
 
-        {/* Assigned To Field */}
+        {/* Assigned To Field - Changed to Dropdown */}
         <div className={styles.formGroup}>
           <label className={styles.formLabel}>Assigned To</label>
-          <input
-            type="text"
-            className={styles.formInput}
+          <select
+            className={styles.formSelect}
             value={assignedTo}
             onChange={(e) => setAssignedTo(e.target.value)}
-            placeholder="User name or ID"
-          />
+          >
+            <option value="">Select Member</option>
+            {members.map((member) => (
+              <option key={member.id} value={member.id}>
+                {member.full_name || member.email}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Priority Dropdown */}
@@ -144,7 +168,6 @@ const SearchBlock = ({ onSubmit, loading = false }) => {
             <option value="low">Low</option>
             <option value="medium">Medium</option>
             <option value="high">High</option>
-            <option value="urgent">Urgent</option>
           </select>
         </div>
 

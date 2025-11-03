@@ -65,8 +65,13 @@ const SearchResultsBlock = ({ searchResults = [], onClose }) => {
     createdBy: 'Current User', // You can replace with actual creator data
     department: 'Operation',
     location: 'Office',
-    assignedTo: task.member_ids && task.member_ids.length > 0 ? `User ${task.member_ids[0]}` : 'Unassigned',
-    assignedDepartment: 'Dev'
+    // Fixed: Use member_names if available, otherwise use member_ids to show actual IDs
+    assignedTo: task.member_names || (task.member_ids && task.member_ids.length > 0 
+      ? `Users: ${task.member_ids.join(', ')}` 
+      : 'Unassigned'),
+    assignedDepartment: 'Dev',
+    // Fixed: preserve member_ids for display logic
+    member_ids: task.member_ids || []
   });
 
   const results = searchResults.map(transformTaskData);
@@ -92,8 +97,10 @@ const SearchResultsBlock = ({ searchResults = [], onClose }) => {
               <th className={styles.tableHeader}>Project/Type</th>
               <th className={styles.tableHeader}>Status</th>
               <th className={styles.tableHeader}>Priority</th>
-              <th className={styles.tableHeader}>Created By/Department/Location</th>
-              <th className={styles.tableHeader}>Assign To/Department</th>
+              {/* <th className={styles.tableHeader}>Created By/Department/Location</th> */}
+              <th className={styles.tableHeader}>Department/Location</th>
+              {/* Fixed: changed column label to "Assign To" */}
+              <th className={styles.tableHeader}>Assign To</th>
               <th className={styles.tableHeader}>Action</th>
             </tr>
           </thead>
@@ -127,7 +134,10 @@ const SearchResultsBlock = ({ searchResults = [], onClose }) => {
                   </td>
                   <td className={styles.tableCell}>
                     <div className={styles.userInfo}>
-                      <div className={styles.userName}>{result.assignedTo}</div>
+                      {/* Fixed: display actual member information in Assign To column */}
+                      <div className={styles.userName}>
+                        {result.assignedTo}
+                      </div>
                       <div className={styles.userDetails}>
                         {result.assignedDepartment}
                       </div>
@@ -179,3 +189,4 @@ const SearchResultsBlock = ({ searchResults = [], onClose }) => {
 };
 
 export default SearchResultsBlock;
+

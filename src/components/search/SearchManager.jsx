@@ -1,14 +1,33 @@
+
+
 // src/components/SearchManager.jsx
 import React, { useState } from 'react';
 import SearchBlock from './SearchBlock';
 import SearchResultsBlock from './SearchResultsBlock';
 import { searchTasks } from '../api/tasks';
+import { getOrganizationMembers } from '../api/users'; // Import the members API
 
 const TaskSearchManager = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [hasSearched, setHasSearched] = useState(false);
+  const [allMembers, setAllMembers] = useState([]); // Store all members for mapping
+
+  // Load members when component mounts
+  React.useEffect(() => {
+    const loadMembers = async () => {
+      try {
+        const membersData = await getOrganizationMembers();
+        setAllMembers(membersData || []);
+      } catch (error) {
+        console.error('Failed to load members:', error);
+        setAllMembers([]);
+      }
+    };
+    
+    loadMembers();
+  }, []);
 
   const handleSearch = async (searchData) => {
     setLoading(true);
@@ -20,20 +39,13 @@ const TaskSearchManager = () => {
       
       // Map frontend field names to backend field names
       const apiFilters = {
-        fromDate: searchData.fromDate,
-        toDate: searchData.toDate,
-        title: searchData.title,
-        status: searchData.status,
-        priority: searchData.priority,
-        assignedTo: searchData.assignedTo === '-AliRazaNaqvi' ? '' : searchData.assignedTo
+        fromDate: searchData.fromDate || '',
+        toDate: searchData.toDate || '',
+        title: searchData.title || '',
+        status: searchData.status || '',
+        priority: searchData.priority || '',
+        assignedTo: searchData.assignedTo || ''
       };
-
-      // Remove empty values
-      Object.keys(apiFilters).forEach(key => {
-        if (!apiFilters[key]) {
-          delete apiFilters[key];
-        }
-      });
 
       console.log('📤 Sending API filters:', apiFilters);
 
@@ -56,21 +68,33 @@ const TaskSearchManager = () => {
     setError(null);
   };
 
-  // Transform API data to match SearchResultsBlock format
+  // Transform API data to match SearchResultsBlock format WITH ACTUAL MEMBER NAMES
   const transformResults = (apiResults) => {
-    return apiResults.map((task, index) => ({
-      id: task.id,
-      ticketId: task.project_name || `Task-${task.id}`,
-      title: task.title,
-      projectType: task.project_name || 'General',
-      status: task.status,
-      priority: task.priority,
-      createdBy: 'Current User', // You might want to get this from task data
-      department: 'Operation',   // Default or from user data
-      location: 'Office',        // Default
-      assignedTo: task.member_ids && task.member_ids.length > 0 ? `User ${task.member_ids[0]}` : 'Unassigned',
-      assignedDepartment: 'Dev'  // Default
-    }));
+    return apiResults.map((task, index) => {
+      // Fixed: Map member_ids to actual member names
+      const assignedMembers = task.member_ids && task.member_ids.length > 0 
+        ? task.member_ids.map(memberId => {
+            const member = allMembers.find(m => m.id === memberId);
+            return member ? (member.full_name || member.email) : `User ${memberId}`;
+          })
+        : [];
+
+      return {
+        id: task.id,
+        ticketId: task.project_name || `Task-${task.id}`,
+        title: task.title,
+        projectType: task.project_name || 'General',
+        status: task.status,
+        priority: task.priority,
+        createdBy: 'Current User',
+        department: 'Operation',
+        location: 'Office',
+        assignedTo: assignedMembers.length > 0 ? assignedMembers.join(', ') : 'Unassigned',
+        assignedDepartment: 'Dev',
+        // Fixed: store the actual member names for display
+        memberNames: assignedMembers
+      };
+    });
   };
 
   return (
@@ -111,3 +135,5 @@ const TaskSearchManager = () => {
 };
 
 export default TaskSearchManager;
+
+

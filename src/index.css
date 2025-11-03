@@ -1313,7 +1313,7 @@ html, body, #root {
 
 /* Edit button - Blue color (changed from green to match requested color) */
 .project-edit-btn {
-  background: #4f46e5; 
+  background: #3b82f6; 
   color: white;
 
 }
@@ -1326,7 +1326,7 @@ html, body, #root {
 
 /* Hover effects */
 .project-edit-btn:hover:not(:disabled) {
-  background: #4338ca; /* Darker blue */
+  background: #2563eb; /* Darker blue */
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
@@ -2432,7 +2432,7 @@ html, body, #root {
 }
 
 .btn-secondary.active {
-  background: #4f46e5;
+  background: #007bff;
   color: white;
 }
 
@@ -2441,7 +2441,7 @@ html, body, #root {
   align-items: center;
   gap: 8px;
   padding: 8px 16px;
-  background: #4f46e5;
+  background: #007bff;
   color: white;
   border: none;
   border-radius: 6px;
@@ -2453,7 +2453,7 @@ html, body, #root {
 }
 
 .btn-primary:hover {
-  background: #4338ca;
+  background: #0056b3;
 }
 
 /* Performance Table */

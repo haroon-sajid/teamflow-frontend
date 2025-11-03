@@ -99,7 +99,7 @@
 }
 
 .primaryBtn {
-  background-color: #4f46e5;
+  background-color: #3b82f6;
   color: #fff;
   border: none;
   padding: 10px 20px;
@@ -112,7 +112,7 @@
 }
 
 .primaryBtn:hover {
-  background-color: #4338ca;
+  background-color: #2563eb;
   transform: translateY(-1px);
   box-shadow: 0 4px 8px rgba(79, 70, 229, 0.3);
 }

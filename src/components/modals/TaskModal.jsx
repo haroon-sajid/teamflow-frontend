@@ -146,7 +146,7 @@ export default function TaskModal({
   };
 
 
-  // In TaskModal.jsx - FIXED handleSubmit function
+  // In TaskModal.jsx -  handleSubmit function
 const handleSubmit = async (e) => {
   e.preventDefault();
   if (!title.trim() || !projectId) { // ✅ REMOVED memberIds validation
@@ -171,7 +171,7 @@ const handleSubmit = async (e) => {
     title,
     description,
     project_id: parseInt(projectId),
-    member_ids: memberIds || [], // ✅ FIXED: Always send array
+    member_ids: memberIds || [], // ✅  Always send array
     priority,
     due_date: formattedDueDate,
     status,
