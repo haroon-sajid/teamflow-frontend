@@ -118,6 +118,7 @@ export async function updateUser(id, data) {
 /* --------------------  DELETE USER (Super Admin Only)  -------------------- */
 export async function deleteUser(userId) {
   const res = await fetch(`${API_URL}/users/${userId}/permanent`, {
+    
     method: "DELETE",
     headers: authHeaders(),
   });
