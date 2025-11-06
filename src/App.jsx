@@ -17,6 +17,7 @@ import InviteUser from "./pages/InviteUser";
 import Reports from "./pages/Reports";
 import ProfilePage from './components/profile/ProfilePage';
 import HelpSupport from './pages/HelpSupport';
+import TimeSheet from './pages/TimeSheet'; // ✅ Added TimeSheet import
 
 import PlansPage from './pages/PlansPage';
 import PaymentSuccess from './pages/PaymentSuccess';
@@ -57,6 +58,7 @@ function App() {
         <Route path="/reports" element={<Reports />} />
         <Route path="/profile" element={<ProfilePage />} />
         <Route path="/support" element={<HelpSupport />} />
+        <Route path="/timesheet" element={<TimeSheet />} /> {/* ✅ Added TimeSheet route */}
 
         {/* 🔥 FIX: Update these routes to match Stripe redirect URLs */}
         <Route path="/plans" element={<PlansPage />} />
