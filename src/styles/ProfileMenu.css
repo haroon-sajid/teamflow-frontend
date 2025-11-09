@@ -103,21 +103,6 @@
   color: #cbd5e1;
 }
 
-/* .profile-dropdown {
-  position: absolute;
-  bottom: 100%;
-  left: -20px; 
-  width: 240px;
-  background: #1e293b;
-  border: 1px solid #334155;
-  border-radius: 8px;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3),
-              0 8px 10px -6px rgba(0, 0, 0, 0.2);
-  z-index: 1001;
-  overflow: hidden;
-  backdrop-filter: blur(8px);
-  margin-bottom: 8px;
-} */
 
 .profile-dropdown {
   position: absolute;
@@ -134,7 +119,6 @@
   backdrop-filter: blur(8px);
   margin-bottom: 8px;
 }
-
 
 
 .dropdown-header {

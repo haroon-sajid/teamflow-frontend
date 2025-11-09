@@ -55,134 +55,84 @@
   height: fit-content;
 }
 
-/* Enhanced day cell for bottom-aligned content */
-.dayCell {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  min-height: 100px;
-  position: relative;
-}
-
-/* Ensure tasks list starts from bottom */
-.tasksList {
-  margin-top: auto;
-  padding-top: 8px;
-}
-
-/* Responsive adjustments for custom range */
-@media (max-width: 1024px) {
-  .weekSelectionContainer {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 8px;
-  }
-  
-  .customRangeContainer {
-    width: 100%;
-  }
-  
-  .weekTypeDropdown {
-    min-width: 100%;
-  }
-  
-  /* Adjust field sizes on tablet */
-  .shrinkField {
-    flex: 1;
-    min-width: 100%;
-  }
-  
-  .expandField {
-    flex: 1;
-    min-width: 100%;
-  }
-}
-
-@media (max-width: 768px) {
-  .customRangeContainer {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .dateSeparator {
-    display: none;
-  }
-}
-
-/* Rest of the existing CSS remains exactly the same */
+/* Container */
 .container {
-  padding: 24px;
-  max-width: 1200px;
+  padding: 16px;
+  max-width: 1400px;
   margin: 0 auto;
   min-height: calc(100vh - 200px);
 }
 
+/* Filter Bar - Match screenshot style */
 .filterBar {
   display: flex;
   gap: 16px;
   align-items: flex-end;
   background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 24px;
+  padding: 16px 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  margin-bottom: 20px;
   flex-wrap: wrap;
+  border: 1px solid #e1e5e9;
 }
 
 .filterGroup {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 6px;
   flex: 1;
   min-width: 200px;
 }
 
 .filterLabel {
-  font-size: 14px;
-  font-weight: 500;
-  color: #495057;
-  margin-bottom: 4px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #2d3748;
+  margin-bottom: 2px;
 }
 
 .dropdown {
   padding: 10px 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
+  border: 1px solid #cbd5e0;
+  border-radius: 8px;
   font-size: 14px;
   background-color: white;
-  color: #495057;
+  color: #2d3748;
   cursor: pointer;
-  transition: border-color 0.2s ease;
+  transition: all 0.2s ease;
+  font-weight: 500;
 }
 
 .dropdown:focus {
   outline: none;
-  border-color: #007bff;
-  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.25);
+  border-color: #4299e1;
+  box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
 }
 
 .searchButton {
-  background-color: #28a745;
+  background-color: #4299e1;
   color: white;
   border: none;
   padding: 10px 24px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
   height: fit-content;
   display: flex;
   align-items: center;
   gap: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .searchButton:hover {
-  background-color: #218838;
+  background-color: #3182ce;
 }
 
 .searchButton:disabled {
-  background-color: #6c757d;
+  background-color: #a0aec0;
   cursor: not-allowed;
 }
 
@@ -195,48 +145,153 @@
   animation: spin 1s linear infinite;
 }
 
+/* Week Header - Match screenshot */
 .weekHeader {
   display: flex;
-  background: white;
-  padding: 16px 20px;
-  border-radius: 8px 8px 0 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-  margin-bottom: 2px;
-  font-weight: 600;
-  color: #495057;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  padding: 14px 20px;
+  border-radius: 12px 12px 0 0;
+  margin-bottom: 0;
+  font-weight: 700;
+  color: white;
+  border: 1px solid #e1e5e9;
+  border-bottom: none;
 }
 
 .employeeInfoHeader {
   width: 300px;
   flex-shrink: 0;
   font-weight: 600;
+  font-size: 14px;
 }
 
 .daysGrid {
   display: grid;
-  gap: 16px;
+  gap: 8px;
   flex: 1;
 }
 
 .dayHeader {
   text-align: center;
-  padding: 8px;
-  background-color: #f8f9fa;
-  border-radius: 4px;
+  padding: 8px 4px;
+  background-color: transparent;
+  border-radius: 6px;
 }
 
 .dayName {
   font-size: 14px;
-  font-weight: 600;
-  color: #495057;
+  font-weight: 700;
+  color: white;
+  margin-bottom: 2px;
 }
 
 .date {
   font-size: 12px;
-  color: #6c757d;
-  margin-top: 2px;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 500;
 }
 
+
+
+
+
+
+
+
+/* Add these new styles to TimeSheet.module.css */
+
+/* New container for day cell and metrics */
+.dayCellContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Update dayCell to remove bottom spacing */
+.dayCell {
+  text-align: center;
+  padding: 12px 6px;
+  background-color: white;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  min-height: 100px;
+  transition: all 0.2s ease;
+  margin-bottom: 0; /* Remove any bottom margin */
+}
+
+/* Day Metrics - positioned completely outside the box */
+.dayMetrics {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 4px;
+  gap: 8px;
+  margin-top: 0; /* No top margin since it's outside */
+}
+
+.workHours {
+  font-size: 10px;
+  font-weight: 600;
+  color: #2d3748;
+  white-space: nowrap;
+}
+
+.taskTime {
+  font-size: 10px;
+  color: #718096;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Ensure tasks list takes available space */
+.tasksList {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 70px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+/* Update dayContent to fill available space */
+.dayContent {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  justify-content: space-between;
+}
+
+/* Update responsive design */
+@media (max-width: 480px) {
+  .dayMetrics {
+    flex-direction: column;
+    gap: 2px;
+  }
+  
+  .workHours,
+  .taskTime {
+    font-size: 11px;
+  }
+  
+  .dayCellContainer {
+    gap: 6px;
+  }
+}
+
+
+
+
+
+
+
+
+
+
+/* Loading State */
 .loading {
   display: flex;
   flex-direction: column;
@@ -247,16 +302,17 @@
   font-size: 16px;
   color: #6c757d;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   gap: 16px;
+  border: 1px solid #e1e5e9;
 }
 
 .loadingSpinner {
   width: 40px;
   height: 40px;
   border: 4px solid #f3f3f3;
-  border-top: 4px solid #007bff;
+  border-top: 4px solid #4299e1;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
@@ -274,9 +330,10 @@
   text-align: center;
   padding: 60px 20px;
   background: white;
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   gap: 16px;
+  border: 1px solid #e1e5e9;
 }
 
 .emptyStateIcon {
@@ -287,76 +344,88 @@
 .emptyState h3 {
   font-size: 20px;
   font-weight: 600;
-  color: #2c3e50;
+  color: #2d3748;
   margin: 0;
 }
 
 .emptyState p {
   font-size: 16px;
-  color: #6c757d;
+  color: #718096;
   margin: 0;
 }
 
 .retryButton {
-  background-color: #007bff;
+  background-color: #4299e1;
   color: white;
   border: none;
   padding: 10px 20px;
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 14px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.2s ease;
   margin-top: 16px;
 }
 
 .retryButton:hover {
-  background-color: #0056b3;
+  background-color: #3182ce;
 }
 
+/* Timesheet Grid - Match screenshot layout */
 .timesheetGrid {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 0;
+  background: white;
+  border-radius: 0 0 12px 12px;
+  border: 1px solid #e1e5e9;
+  border-top: none;
+  overflow: hidden;
 }
 
 .employeeCard {
   display: flex;
   background: white;
-  padding: 20px;
-  border-radius: 0;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-  transition: box-shadow 0.2s ease;
+  padding: 16px 20px;
+  border-bottom: 1px solid #e1e5e9;
+  transition: background-color 0.2s ease;
 }
 
 .employeeCard:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  background-color: #f7fafc;
+}
+
+.employeeCard:last-child {
+  border-bottom: none;
 }
 
 .employeeInfo {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   width: 300px;
   flex-shrink: 0;
-  align-items: flex-start;
+  align-items: center;
 }
 
 .employeeAvatar {
   width: 50px;
   height: 50px;
-  border-radius: 50%;
-  background-color: #e9ecef;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   display: flex;
   align-items: center;
   justify-content: center;
   overflow: hidden;
   flex-shrink: 0;
+  border: 2px solid white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 .employeeAvatar img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  border-radius: 8px;
 }
 
 .avatarPlaceholder {
@@ -365,10 +434,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: #007bff;
   color: white;
-  font-weight: 600;
+  font-weight: 700;
   font-size: 18px;
+  border-radius: 8px;
 }
 
 .employeeDetails {
@@ -378,8 +447,8 @@
 
 .employeeName {
   font-size: 16px;
-  font-weight: 600;
-  color: #2c3e50;
+  font-weight: 700;
+  color: #2d3748;
   margin: 0 0 4px 0;
   white-space: nowrap;
   overflow: hidden;
@@ -387,174 +456,79 @@
 }
 
 .employeeDesignation {
-  font-size: 14px;
-  color: #6c757d;
+  font-size: 13px;
+  color: #718096;
   margin: 0 0 8px 0;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 500;
 }
 
 .employeeStats {
   display: flex;
-  gap: 16px;
+  gap: 12px;
   flex-wrap: wrap;
 }
 
 .statTwh {
-  font-size: 13px;
-  color: #495057;
-  background-color: #f8f9fa;
-  padding: 4px 8px;
-  border-radius: 4px;
+  font-size: 12px;
+  color: #2d3748;
+  background-color: #edf2f7;
+  padding: 6px 10px;
+  border-radius: 6px;
   white-space: nowrap;
+  font-weight: 600;
+  border: 1px solid #e2e8f0;
 }
 
 .statTtt {
-  font-size: 13px;
-  color: #074173;
-  background-color: #e0f2ff; /* soft sky blue */
-  padding: 4px 8px;
-  border-radius: 4px;
+  font-size: 12px;
+  color: #234e52;
+  background-color: #b2f5ea;
+  padding: 6px 10px;
+  border-radius: 6px;
   white-space: nowrap;
+  font-weight: 600;
+  border: 1px solid #81e6d9;
 }
 
-
+/* Day Cell - Match screenshot exactly */
 .dayCell {
   text-align: center;
-  padding: 12px 8px;
-  background-color: #f8f9fa;
-  border-radius: 6px;
-  border: 1px solid #e9ecef;
+  padding: 12px 6px;
+  background-color: white;
+  border-radius: 8px;
+  border: 2px solid #e2e8f0;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  min-height: 80px;
+  justify-content: space-between;
+  min-height: 100px;
+  transition: all 0.2s ease;
 }
 
-.workHours {
-  font-size: 14px;
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 4px;
+.dayCell:hover {
+  border-color: #cbd5e0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
-.taskTime {
-  font-size: 12px;
-  color: #6c757d;
-}
 
-/* Responsive Design */
-@media (max-width: 1024px) {
-  .container {
-    padding: 20px;
-  }
-  
-  .filterBar {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .filterGroup {
-    min-width: 100%;
-  }
-  
-  .employeeCard {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .employeeInfo {
-    width: 100%;
-  }
-  
-  .daysGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
 
-@media (max-width: 768px) {
-  .container {
-    padding: 16px;
-  }
-  
-  .weekHeader {
-    flex-direction: column;
-    gap: 16px;
-  }
-  
-  .employeeInfoHeader {
-    width: 100%;
-  }
-  
-  .daysGrid {
-    grid-template-columns: 1fr;
-  }
-  
-  .employeeStats {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .employeeInfo {
-    flex-direction: column;
-    text-align: center;
-  }
-  
-  .employeeAvatar {
-    align-self: center;
-  }
-}
-
-@media (max-width: 480px) {
-  .container {
-    padding: 12px;
-  }
-  
-  .filterBar {
-    padding: 16px;
-  }
-  
-  .employeeCard {
-    padding: 16px;
-  }
-  
-  .dayCell {
-    padding: 8px 4px;
-  }
-  
-  .workHours {
-    font-size: 13px;
-  }
-  
-  .taskTime {
-    font-size: 11px;
-  }
-  
-  .employeeStats {
-    flex-direction: column;
-  }
-  
-  .stat {
-    text-align: center;
-  }
-}
-
-/* Task Display Styles */
+/* Task Display Styles - Match screenshot colors */
 .tasksList {
-  margin-top: 8px;
+  margin-top: auto;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  max-height: 80px;
+  max-height: 70px;
   overflow-y: auto;
 }
 
 .taskItem {
-  padding: 3px 6px;
+  padding: 4px 6px;
   border-radius: 4px;
   font-size: 10px;
-  font-weight: 500;
+  font-weight: 600;
   text-align: left;
   border-left: 3px solid;
   line-height: 1.2;
@@ -569,37 +543,38 @@
   white-space: nowrap;
 }
 
-/* Priority-based colors */
+/* Priority-based colors - Exact match from screenshot */
 .taskPriorityHigh {
-  background-color: #ffe6e6;
-  border-left-color: #dc3545;
-  color: #721c24;
+  background-color: #fed7d7;
+  border-left-color: #e53e3e;
+  color: #742a2a;
 }
 
 .taskPriorityMedium {
-  background-color: #fff3cd;
-  border-left-color: #ffc107;
-  color: #856404;
+  background-color: #fef5e7;
+  border-left-color: #dd6b20;
+  color: #7b341e;
 }
 
 .taskPriorityLow {
-  background-color: #e6f3e6;
-  border-left-color: #28a745;
-  color: #155724;
+  background-color: #c6f6d5;
+  border-left-color: #38a169;
+  color: #22543d;
 }
 
 .taskPriorityDefault {
-  background-color: #e6f2ff;
-  border-left-color: #007bff;
-  color: #004085;
+  background-color: #bee3f8;
+  border-left-color: #3182ce;
+  color: #2a4365;
 }
 
 .moreTasks {
   font-size: 9px;
-  color: #6c757d;
+  color: #718096;
   text-align: center;
   padding: 2px;
   font-style: italic;
+  font-weight: 500;
 }
 
 /* Scrollbar styling for tasks list */
@@ -621,60 +596,30 @@
   background: #a8a8a8;
 }
 
-/* Adjust day cell for task display */
-.dayCell {
-  min-height: 80px;
-  position: relative;
-}
-
-/* Responsive adjustments for task display */
-@media (max-width: 768px) {
-  .taskItem {
-    font-size: 9px;
-    padding: 2px 4px;
-  }
-  
-  .tasksList {
-    gap: 2px;
-    max-height: 60px;
-  }
-  
-  .moreTasks {
-    font-size: 8px;
-  }
-}
-
-
-
-
-
-
-
-
-
-/* Add to TimeSheet.module.css */
-
 /* Future date styling */
 .futureDate {
   font-size: 10px;
-  color: #6c757d;
+  color: #a0aec0;
   font-style: italic;
   text-align: center;
   margin-top: 8px;
+  font-weight: 500;
 }
 
 .futureBadge {
   font-size: 9px;
-  color: #6c757d;
-  background-color: #e9ecef;
-  padding: 2px 6px;
+  color: #718096;
+  background-color: #edf2f7;
+  padding: 3px 8px;
   border-radius: 10px;
   margin-top: 4px;
+  font-weight: 600;
 }
 
 .futureDay {
-  background-color: #f8f9fa;
-  opacity: 0.7;
+  background-color: #f7fafc;
+  opacity: 0.8;
+  border-color: #e2e8f0;
 }
 
 .futureDateContent {
@@ -682,8 +627,9 @@
   align-items: center;
   justify-content: center;
   height: 100%;
-  color: #6c757d;
+  color: #a0aec0;
   font-style: italic;
+  font-weight: 500;
 }
 
 .futureText {
@@ -693,27 +639,157 @@
 
 .taskHours {
   font-size: 9px;
-  color: #495057;
+  color: #4a5568;
   margin-left: 4px;
-  font-weight: normal;
+  font-weight: 600;
 }
 
-/* Enhanced responsive design for custom range */
+/* Enhanced responsive design */
+@media (max-width: 1024px) {
+  .container {
+    padding: 12px;
+  }
+  
+  .weekSelectionContainer {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  
+  .customRangeContainer {
+    width: 100%;
+  }
+  
+  .weekTypeDropdown {
+    min-width: 100%;
+  }
+  
+  .filterBar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .filterGroup {
+    min-width: 100%;
+  }
+  
+  .employeeCard {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .employeeInfo {
+    width: 100%;
+  }
+  
+  .daysGrid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+  
+  .shrinkField {
+    flex: 1;
+    min-width: 100%;
+  }
+  
+  .expandField {
+    flex: 1;
+    min-width: 100%;
+  }
+}
+
 @media (max-width: 768px) {
+  .container {
+    padding: 8px;
+  }
+  
   .customRangeContainer {
     flex-direction: column;
+    gap: 8px;
   }
   
   .dateSeparator {
+    display: none;
+  }
+  
+  .weekHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .employeeInfoHeader {
+    width: 100%;
+  }
+  
+  .daysGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .employeeStats {
+    flex-direction: column;
+    gap: 6px;
+  }
+  
+  .employeeInfo {
+    flex-direction: column;
     text-align: center;
-    margin: 4px 0;
+  }
+  
+  .employeeAvatar {
+    align-self: center;
   }
 }
 
-/* Better alignment for future dates */
-.dayCell.futureDay {
-  border: 1px dashed #dee2e6;
+@media (max-width: 480px) {
+  .container {
+    padding: 8px;
+  }
+  
+  .filterBar {
+    padding: 12px;
+  }
+  
+  .employeeCard {
+    padding: 12px;
+  }
+  
+  .dayCell {
+    padding: 8px 4px;
+    min-height: 90px;
+  }
+  
+  .workHours {
+    font-size: 10px;
+  }
+  
+  .taskTime {
+    font-size: 11px;
+  }
+  
+  .employeeStats {
+    flex-direction: column;
+  }
+  
+  .stat {
+    text-align: center;
+  }
 }
+
+
+
+.clickableTtt {
+  cursor: pointer !important;
+  color: #007bff;
+  font-weight: 500;
+  transition: color 0.2s ease;
+  user-select: none; /* prevents text selection on click */
+}
+
+.clickableTtt:hover {
+  color: #0056b3;
+  text-decoration: underline;
+}
+
+
 
 
 

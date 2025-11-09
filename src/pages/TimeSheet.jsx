@@ -1,5 +1,5 @@
-// Update in TimeSheet.jsx
 
+// Update in TimeSheet.jsx
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
@@ -11,17 +11,20 @@ import {
   getNextWeekStart,
   getPreviousWeekStart,
   formatDateForDisplay,
-  getUserTasksForWeek,
-  getFilteredUserTasks,  // NEW: Import filtered endpoint
-  getWorklogsSummary     // NEW: For TWH/TTT calculations
+  getFilteredUserTasks,
+  getWorklogsSummary
 } from '../api/timesheet';
 import { getOrganizationMembers } from '../api/users';
+import { getTask, createTask, updateTask, getTasks } from '../api/tasks';
+import TaskModal from "../components/modals/TaskModal";
+import TimeLogDetailsModal from "../components/modals/TimeLogDetailsModal.jsx";
 
 const TimeSheet = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]);
+  const [projects, setProjects] = useState([]);
   const [filters, setFilters] = useState({
     department: '',
     employee_id: '',
@@ -31,19 +34,52 @@ const TimeSheet = () => {
     custom_end: ''
   });
 
-  // NEW: Track current date for filtering
-  const [currentDate] = useState(new Date());
+  // Modal state management
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [modalMode, setModalMode] = useState('edit');
+  const [modalLoading, setModalLoading] = useState(false);
 
-  // NEW: Get today's date for TTT calculation
-  const getTodayDate = () => {
-    return new Date().toISOString().split('T')[0];
+  // ✅ NEW: State for Time Log Details Modal
+  const [showTimeLogModal, setShowTimeLogModal] = useState(false);
+  const [selectedEmployee, setSelectedEmployee] = useState(null);
+
+  // ... existing statusMap and adminName ...
+
+  const statusMap = {
+    open: "Open",
+    todo: "To Do",
+    "inprogress": "In Progress",
+    "in-progress": "In Progress",
+    qa: "In QA",
+    inqa: "In QA",
+    "in_qa": "In QA",
+    done: "Done",
   };
+
+  const adminName = localStorage.getItem("userName") || "Admin";
 
   // Fetch initial data
   useEffect(() => {
     fetchTimesheetData();
     fetchOrganizationMembers();
+    fetchProjects();
   }, []);
+
+  // ✅ NEW: Function to open time log details modal
+  const openTimeLogDetails = (employee) => {
+    setSelectedEmployee({
+      id: employee.user_id || employee.id,
+      name: employee.full_name || employee.user_name || "Unknown"
+    });
+    setShowTimeLogModal(true);
+  };
+
+  // ✅ NEW: Function to close time log details modal
+  const closeTimeLogDetails = () => {
+    setShowTimeLogModal(false);
+    setSelectedEmployee(null);
+  };
 
   const fetchOrganizationMembers = async () => {
     try {
@@ -55,7 +91,119 @@ const TimeSheet = () => {
     }
   };
 
-  // UPDATED: Fetch timesheet data with proper filtering
+  // ... existing fetchProjects, normalizeTaskData, openCreateTaskModal, saveTask, closeTaskModal functions ...
+
+  const fetchProjects = async () => {
+    try {
+      const { getProjects } = await import('../api/projects');
+      const projectsData = await getProjects();
+      setProjects(projectsData || []);
+    } catch (error) {
+      console.error('Error fetching projects:', error);
+      setProjects([]);
+    }
+  };
+
+  const normalizeTaskData = (taskData) => {
+    if (!taskData) return null;
+
+    const memberIds = taskData.member_ids || (taskData.member_id ? [taskData.member_id] : []);
+    const members = memberIds.map(memberId => 
+      employees.find(u => u.id === memberId)
+    ).filter(Boolean);
+    
+    const project = projects.find((p) => p.id === taskData.project_id);
+    
+    const statusKey = taskData.status?.toLowerCase().replace(/[-\s]/g, "");
+    const displayStatus = statusMap[statusKey] || "Open";
+
+    return {
+      ...taskData,
+      status: displayStatus,
+      project_name: project?.title || "Unknown Project",
+      members: members,
+      created_by_name: adminName,
+    };
+  };
+
+  const openCreateTaskModal = async (taskId = null) => {
+    if (taskId) {
+      setModalLoading(true);
+      try {
+        const tasks = await getTasks();
+        const taskData = tasks.find(t => t.id === taskId);
+        
+        if (taskData) {
+          const normalizedTask = normalizeTaskData(taskData);
+          setSelectedTask(normalizedTask);
+          setModalMode('view');
+        } else {
+          const singleTaskData = await getTask(taskId);
+          const normalizedTask = normalizeTaskData(singleTaskData);
+          setSelectedTask(normalizedTask);
+          setModalMode('view');
+        }
+      } catch (error) {
+        console.error('Error fetching task:', error);
+        setSelectedTask({ id: taskId });
+        setModalMode('view');
+      } finally {
+        setModalLoading(false);
+      }
+    } else {
+      setSelectedTask(null);
+      setModalMode('edit');
+    }
+    setShowTaskModal(true);
+  };
+
+  const saveTask = async (payload) => {
+    try {
+      setModalLoading(true);
+      
+      const reverseStatusMap = {
+        "Open": "open",
+        "To Do": "todo",
+        "In Progress": "in-progress",
+        "In QA": "in_qa",
+        "Done": "done",
+      };
+
+      const backendStatus = reverseStatusMap[payload.status] || payload.status.toLowerCase().replace(/ /g, "-");
+      const taskPayload = { 
+        ...payload, 
+        status: backendStatus 
+      };
+
+      Object.keys(taskPayload).forEach(
+        key => taskPayload[key] === undefined && delete taskPayload[key]
+      );
+
+      if (payload.id) {
+        await updateTask(payload.id, taskPayload);
+        console.log('Task updated successfully');
+      } else {
+        await createTask(taskPayload);
+        console.log('Task created successfully');
+      }
+      
+      closeTaskModal();
+      fetchTimesheetData();
+    } catch (error) {
+      console.error('Error saving task:', error);
+    } finally {
+      setModalLoading(false);
+    }
+  };
+
+  const closeTaskModal = () => {
+    setShowTaskModal(false);
+    setSelectedTask(null);
+    setModalLoading(false);
+  };
+
+  // ... rest of your existing functions (fetchTimesheetData, enhanceDataWithWorklogsSummary, formatEmployeeTaskData, etc.) ...
+
   const fetchTimesheetData = async () => {
     setLoading(true);
     try {
@@ -93,16 +241,19 @@ const TimeSheet = () => {
       let timesheetData;
       
       if (filters.employee_id) {
-        // NEW: Use filtered endpoint for proper date handling
-        const taskData = await getFilteredUserTasks(apiFilters);
-        const formattedData = formatEmployeeTaskData(taskData, filters.employee_id);
+        const [taskData, worklogsData] = await Promise.all([
+          getFilteredUserTasks(apiFilters),
+          getWorklogsSummary(apiFilters)
+        ]);
+        
+        const formattedData = formatEmployeeTaskData(taskData, worklogsData, filters.employee_id);
         timesheetData = formattedData;
       } else {
         const summaryResponse = await getEmployeesTimesheet(apiFilters);
         timesheetData = summaryResponse.data || summaryResponse || [];
         
         if (timesheetData.length > 0) {
-          const enhancedData = await enhanceDataWithTaskDetails(timesheetData, apiFilters.week_start || apiFilters.start_date);
+          const enhancedData = await enhanceDataWithWorklogsSummary(timesheetData, apiFilters.week_start || apiFilters.start_date);
           timesheetData = enhancedData;
         }
       }
@@ -116,104 +267,70 @@ const TimeSheet = () => {
     }
   };
 
-  // UPDATED: Enhanced data formatting with proper TWH/TTT calculations
-  // UPDATED: Enhanced data formatting with proper TWH/TTT calculations
-const enhanceDataWithTaskDetails = async (timesheetData, weekStart) => {
-  try {
-    const enhancedData = [];
-    const currentDate = new Date().toISOString().split('T')[0];
-    const todayDate = getTodayDate(); // NEW: For TTT calculation
-    
-    for (const employee of timesheetData) {
-      try {
-        // Use filtered endpoint for proper date handling
-        const taskData = await getFilteredUserTasks({
-          week_start: weekStart,
-          user_id: employee.user_id || employee.id
-        });
-        
-        const weekDates = getWeekDates();
-        const dailyDataWithTasks = [];
-        let weeklyTotalHours = 0; // NEW: Track weekly total for TWH
-        let todayTaskTime = 0;    // NEW: Track today's task time for TTT
-        
-        weekDates.forEach((weekDate, index) => {
-          const dateStr = weekDate.isoDate;
-          const isFutureDate = dateStr > currentDate;
-          const isToday = dateStr === todayDate; // NEW: Check if this is today
-          
-          // NEW: Only get tasks for this specific date, and only if not future date
-          const dayTasks = !isFutureDate ? (taskData.daily_tasks?.[dateStr] || []) : [];
-          
-          const existingDayData = (employee.daily_data || employee.week_data || [])[index] || {};
-          
-          // FIXED: Use work_hours from existing data OR calculate from tasks if not available
-          const dailyWorkHours = existingDayData.work_hours || existingDayData.hours || 
-                               dayTasks.reduce((sum, task) => sum + (task.logged_hours || 0), 0);
-          const dailyTaskHours = dayTasks.reduce((sum, task) => sum + (task.logged_hours || 0), 0);
-          
-          // NEW: Accumulate weekly total - use work_hours if available, otherwise task hours
-          weeklyTotalHours += dailyWorkHours;
-          
-          // NEW: If this is today, set today's task time
-          if (isToday && !isFutureDate) {
-            todayTaskTime = dailyTaskHours;
-          }
-          
-          dailyDataWithTasks.push({
-            day: weekDate.day,
-            date: weekDate.date,
-            isoDate: dateStr,
-            work_hours: dailyWorkHours,
-            task_time: dailyTaskHours,
-            tasks: dayTasks,
-            isFuture: isFutureDate,
-            isToday: isToday // NEW: Track today's date
+  const enhanceDataWithWorklogsSummary = async (timesheetData, weekStart) => {
+    try {
+      const enhancedData = [];
+      const currentDate = new Date().toISOString().split('T')[0];
+      
+      for (const employee of timesheetData) {
+        try {
+          const worklogsData = await getWorklogsSummary({
+            week_start: weekStart,
+            user_id: employee.user_id || employee.id
           });
-        });
-        
-        // NEW: Use proper calculations for TWH and TTT
-        const totalWorkHours = weeklyTotalHours; // TWH: Total weekly work hours
-        const totalTaskTime = todayTaskTime;     // TTT: Only today's task time
-        
-        enhancedData.push({
-          ...employee,
-          daily_data: dailyDataWithTasks,
-          total_work_hours: totalWorkHours,  // TWH - Weekly total
-          total_task_time: totalTaskTime,     // TTT - Today's task time only
-          weekly_total_hours: weeklyTotalHours // NEW: Keep track of weekly total separately
-        });
-      } catch (error) {
-        console.error(`Error fetching tasks for employee ${employee.user_id}:`, error);
-        // NEW: Provide fallback calculations
-        const todayDate = getTodayDate();
-        const dailyData = employee.daily_data || employee.week_data || [];
-        
-        // FIXED: Calculate weekly total from daily work hours
-        const weeklyTotal = dailyData.reduce((sum, day) => {
-          return sum + (day.work_hours || day.hours || 0);
-        }, 0);
-        
-        const todayData = dailyData.find(day => day.isoDate === todayDate) || {};
-        const todayTaskTime = todayData.task_time || todayData.task_hours || 0;
-        
-        enhancedData.push({
-          ...employee,
-          total_work_hours: weeklyTotal,  // TWH
-          total_task_time: todayTaskTime   // TTT
-        });
-      }
-    }
-    
-    return enhancedData;
-  } catch (error) {
-    console.error('Error enhancing data with task details:', error);
-    return timesheetData;
-  }
-};
 
-  // UPDATED: Format employee task data with proper TWH/TTT
-  const formatEmployeeTaskData = (taskData, employeeId) => {
+          const taskData = await getFilteredUserTasks({
+            week_start: weekStart,
+            user_id: employee.user_id || employee.id
+          });
+          
+          const weekDates = getWeekDates();
+          const dailyDataWithTasks = [];
+          
+          weekDates.forEach((weekDate, index) => {
+            const dateStr = weekDate.isoDate;
+            const isFutureDate = dateStr > currentDate;
+            
+            const dayTasks = !isFutureDate ? (taskData.daily_tasks?.[dateStr] || []) : [];
+            
+            const existingDayData = (employee.daily_data || employee.week_data || [])[index] || {};
+            
+            const dailyTaskHours = dayTasks.reduce((sum, task) => sum + (task.logged_hours || 0), 0);
+            const dailyWorkHours = existingDayData.work_hours || existingDayData.hours || dailyTaskHours;
+            
+            dailyDataWithTasks.push({
+              day: weekDate.day,
+              date: weekDate.date,
+              isoDate: dateStr,
+              work_hours: dailyWorkHours,
+              task_time: dailyTaskHours,
+              tasks: dayTasks,
+              isFuture: isFutureDate,
+              isToday: dateStr === currentDate
+            });
+          });
+          
+          enhancedData.push({
+            ...employee,
+            daily_data: dailyDataWithTasks,
+            total_work_hours: worklogsData.total_work_hours || 0,
+            total_task_time: worklogsData.total_task_time || 0,
+            weekly_total_hours: worklogsData.total_work_hours || 0
+          });
+        } catch (error) {
+          console.error(`Error enhancing data for employee ${employee.user_id}:`, error);
+          enhancedData.push(employee);
+        }
+      }
+      
+      return enhancedData;
+    } catch (error) {
+      console.error('Error enhancing data with worklogs summary:', error);
+      return timesheetData;
+    }
+  };
+
+  const formatEmployeeTaskData = (taskData, worklogsData, employeeId) => {
     if (!taskData || !taskData.daily_tasks) return [];
     
     const employee = employees.find(emp => emp.id === parseInt(employeeId));
@@ -221,29 +338,16 @@ const enhanceDataWithTaskDetails = async (timesheetData, weekStart) => {
     
     const weekDates = getWeekDates();
     const currentDate = new Date().toISOString().split('T')[0];
-    const todayDate = getTodayDate(); // NEW: For TTT calculation
     const formattedData = [];
-    let weeklyTotalHours = 0; // NEW: Track weekly total
-    let todayTaskTime = 0;    // NEW: Track today's task time
     
     weekDates.forEach((weekDate, index) => {
       const dateStr = weekDate.isoDate;
       const isFutureDate = dateStr > currentDate;
-      const isToday = dateStr === todayDate; // NEW: Check if today
       
-      // NEW: Only show tasks for current and past dates
       const dayTasks = !isFutureDate ? (taskData.daily_tasks[dateStr] || []) : [];
       
       const dailyTaskHours = dayTasks.reduce((sum, task) => sum + (task.logged_hours || 0), 0);
-      const dailyWorkHours = dailyTaskHours; // Assuming work hours = task hours for single employee view
-      
-      // NEW: Accumulate weekly total
-      weeklyTotalHours += dailyWorkHours;
-      
-      // NEW: If this is today, set today's task time
-      if (isToday && !isFutureDate) {
-        todayTaskTime = dailyTaskHours;
-      }
+      const dailyWorkHours = dailyTaskHours;
       
       formattedData.push({
         day: weekDate.day,
@@ -253,13 +357,9 @@ const enhanceDataWithTaskDetails = async (timesheetData, weekStart) => {
         task_time: dailyTaskHours,
         tasks: dayTasks,
         isFuture: isFutureDate,
-        isToday: isToday // NEW: Track today's date
+        isToday: dateStr === currentDate
       });
     });
-    
-    // NEW: Use proper calculations
-    const totalWorkHours = weeklyTotalHours; // TWH: Weekly total
-    const totalTaskTime = todayTaskTime;     // TTT: Today's task time only
     
     return [{
       id: employeeId,
@@ -270,10 +370,10 @@ const enhanceDataWithTaskDetails = async (timesheetData, weekStart) => {
       user_name: employee.user_name,
       profile_image: employee.profile_image,
       designation: employee.designation || employee.role || 'Employee',
-      total_work_hours: totalWorkHours,  // TWH - Weekly total
-      total_task_time: totalTaskTime,     // TTT - Today's task time only
+      total_work_hours: worklogsData.total_work_hours || 0,
+      total_task_time: worklogsData.total_task_time || 0,
       daily_data: formattedData,
-      weekly_total_hours: weeklyTotalHours // NEW: Keep weekly total
+      weekly_total_hours: worklogsData.total_work_hours || 0
     }];
   };
 
@@ -319,18 +419,16 @@ const enhanceDataWithTaskDetails = async (timesheetData, weekStart) => {
       
       const isoDate = date.toISOString().split('T')[0];
       dates.push({
-        day: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'][date.getDay()] || `Day ${i+1}`,
+        day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()],
         date: formatDateForDisplay(isoDate),
         isoDate: isoDate,
-        isFuture: isoDate > new Date().toISOString().split('T')[0]  // NEW: Track future dates
+        isFuture: isoDate > new Date().toISOString().split('T')[0]
       });
     }
     return dates;
   };
 
-  // UPDATED: Render task names with future date handling
   const renderTaskNames = (tasks, dateStr, isFuture = false) => {
-    // NEW: Don't show tasks for future dates
     if (isFuture) {
       return (
         <div className={styles.futureDate}>
@@ -349,6 +447,9 @@ const enhanceDataWithTaskDetails = async (timesheetData, weekStart) => {
           <div 
             key={taskIndex} 
             className={`${styles.taskItem} ${styles[getPriorityClass(task.priority)]}`}
+            onClick={() => openCreateTaskModal(task.task_id || task.id)}
+            style={{cursor: 'pointer'}}
+            title="Click to view/edit task"
           >
             <span className={styles.taskTitle}>
               {task.task_title || task.title || `Task #${task.task_id || task.id}`}
@@ -467,13 +568,12 @@ const enhanceDataWithTaskDetails = async (timesheetData, weekStart) => {
         {/* Week Header */}
         {!loading && data.length > 0 && (
           <div className={styles.weekHeader}>
-            <div className={styles.employeeInfoHeader}></div>
+            <div className={styles.employeeInfoHeader}>Employee</div>
             <div className={styles.daysGrid} style={{ gridTemplateColumns: `repeat(${weekDates.length}, 1fr)` }}>
               {weekDates.map((date, index) => (
                 <div key={index} className={styles.dayHeader}>
                   <div className={styles.dayName}>{date.day}</div>
                   <div className={styles.date}>{date.date}</div>
-                  {date.isFuture && <div className={styles.futureBadge}>Future</div>}
                 </div>
               ))}
             </div>
@@ -488,140 +588,131 @@ const enhanceDataWithTaskDetails = async (timesheetData, weekStart) => {
           </div>
         )}
 
-      {/* Timesheet Grid */}
-      {!loading && data.length > 0 && (
-        <div className={styles.timesheetGrid}>
-          {data.map(employee => (
-            <div
-              key={employee.id || employee.user_id}
-              className={styles.employeeCard}
-            >
-              <div className={styles.employeeInfo}>
-                <div className={styles.employeeAvatar}>
-                  {employee.profile_image ? (
-                    <img
-                      src={
-                        employee.profile_picture ||
-                        employee.profile_image
-                      }
-                      alt={
-                        employee.full_name ||
-                        employee.user_name ||
-                        "Employee"
-                      }
-                    />
-                  ) : (
-                    <div className={styles.avatarPlaceholder}>
-                      {(employee.full_name ||
-                        employee.user_name ||
-                        "EE").charAt(0)}
+        {/* Timesheet Grid */}
+        {!loading && data.length > 0 && (
+          <div className={styles.timesheetGrid}>
+            {data.map(employee => (
+              <div
+                key={employee.id || employee.user_id}
+                className={styles.employeeCard}
+              >
+                <div className={styles.employeeInfo}>
+                  <div className={styles.employeeAvatar}>
+                    {employee.profile_image ? (
+                      <img
+                        src={employee.profile_picture || employee.profile_image}
+                        alt={employee.full_name || employee.user_name || "Employee"}
+                      />
+                    ) : (
+                      <div className={styles.avatarPlaceholder}>
+                        {(employee.full_name || employee.user_name || "EE").charAt(0).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className={styles.employeeDetails}>
+                    <h3 className={styles.employeeName}>
+                      {employee.full_name || employee.user_name || "Unknown"}
+                    </h3>
+                    <p className={styles.employeeDesignation}>
+                      {employee.designation || employee.role || "Employee"}
+                    </p>
+
+                    {/* ✅ UPDATED: Make TTT clickable */}
+                    <div className={styles.employeeStats}>
+                      <span className={styles.statTwh}>
+                        TWH: {employee.total_work_hours?.toFixed(1) || "0.0"}
+                      </span>
+                      <span 
+                        className={`${styles.statTtt} ${styles.clickableTtt}`}
+                        onClick={() => openTimeLogDetails(employee)}
+                        title="Click to view detailed time logs"
+                      >
+                        TTT: {employee.total_task_time?.toFixed(1) || "0.0"}
+                      </span>
                     </div>
-                  )}
-                </div>
-
-                <div className={styles.employeeDetails}>
-                  <h3 className={styles.employeeName}>
-                    {employee.full_name ||
-                      employee.user_name ||
-                      "Unknown"}
-                  </h3>
-                  <p className={styles.employeeDesignation}>
-                    {employee.designation ||
-                      employee.role ||
-                      "Employee"}
-                  </p>
-
-                  {/* UPDATED: Fixed employee stats with correct TWH/TTT mapping */}
-                  <div className={styles.employeeStats}>
-                    <span className={styles.statTwh}>
-                      TWH:{" "}
-                      {employee.total_work_hours?.toFixed(1) ||
-                        employee.weekly_total_hours?.toFixed(1) ||
-                        "0.0"}{" "}
-                      hours
-                    </span>
-                    <span className={styles.statTtt}>
-                      TTT:{" "}
-                      {employee.total_task_time?.toFixed(1) ||
-                        "0.0"}{" "}
-                      hours
-                    </span>
                   </div>
                 </div>
-              </div>
 
                 <div
                   className={styles.daysGrid}
                   style={{
-                    gridTemplateColumns: `repeat(${weekDates.length}, 1fr)`
+                    gridTemplateColumns: `repeat(${weekDates.length}, 1fr)`,
                   }}
                 >
-                  {(employee.daily_data ||
-                    Array(weekDates.length)
-                      .fill()
-                      .map((_, i) => ({
-                        day: weekDates[i]?.day || `Day ${i + 1}`,
-                        work_hours: 0,
-                        task_time: 0,
-                        tasks: [],
-                        isFuture: weekDates[i]?.isFuture || false
-                      })))
-                    .slice(0, weekDates.length)
-                    .map((dayData, index) => (
+                  {employee.daily_data?.map((day, dayIndex) => (
+                    <div key={dayIndex} className={styles.dayCellContainer}>
                       <div
-                        key={index}
-                        className={`${styles.dayCell} ${
-                          dayData.isFuture ? styles.futureDay : ""
-                        }`}
+                        className={`${styles.dayCell} ${day.isFuture ? styles.futureDay : ""}`}
                       >
-                        {dayData.isFuture ? (
+                        {day.isFuture ? (
                           <div className={styles.futureDateContent}>
-                            <div className={styles.futureText}>
-                              Future Date
-                            </div>
+                            <span className={styles.futureText}>Future Date</span>
                           </div>
                         ) : (
-                          <>
-                            <div className={styles.workHours}>
-                              WH: 8.0
-                            </div>
-                            <div className={styles.taskTime}>
-                              Task Time:{" "}
-                              {(dayData.task_time ||
-                                dayData.task_hours ||
-                                0
-                              ).toFixed(1)}
-                            </div>
-                            {/* UPDATED: Pass isFuture flag */}
-                            {renderTaskNames(
-                              dayData.tasks,
-                              dayData.isoDate,
-                              dayData.isFuture
-                            )}
-                          </>
+                          <div className={styles.dayContent}>
+                            {renderTaskNames(day.tasks, day.isoDate, day.isFuture)}
+                          </div>
                         )}
                       </div>
-                    ))}
-                </div>
 
-              
-            </div>
-          ))}
-        </div>
-      )}
-      
+                      {!day.isFuture && (
+                        <div className={styles.dayMetrics}>
+                          <span className={styles.workHours}>
+                            WH: 8.0
+                          </span>
+                          <span className={styles.taskTime}>
+                            Task Time: {day.task_time?.toFixed(1) || "0.0"}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+
         {/* Empty State */}
         {!loading && data.length === 0 && (
           <div className={styles.emptyState}>
             <div className={styles.emptyStateIcon}>📊</div>
-            <h3>No timesheet data found</h3>
-            <p>Please adjust your filters or add new entries.</p>
-            <button className={styles.retryButton} onClick={handleSearch}>
+            <h3>No Timesheet Data</h3>
+            <p>No timesheet records found for the selected filters.</p>
+            <button 
+              className={styles.retryButton}
+              onClick={fetchTimesheetData}
+            >
               Try Again
             </button>
           </div>
         )}
       </div>
+
+      {/* Task Modal */}
+      {showTaskModal && (
+        <TaskModal
+          onClose={closeTaskModal}
+          onSave={saveTask}
+          editing={selectedTask}
+          column={selectedTask?.status || "Open"}
+          projects={projects}
+          users={employees}
+          viewOnly={modalMode === 'view'}
+          loading={modalLoading}
+        />
+      )}
+
+      {/* ✅ NEW: Time Log Details Modal */}
+      {showTimeLogModal && selectedEmployee && (
+        <TimeLogDetailsModal
+          isOpen={showTimeLogModal}
+          onClose={closeTimeLogDetails}
+          userId={selectedEmployee.id}
+          userName={selectedEmployee.name}
+        />
+      )}
     </Layout>
   );
 };

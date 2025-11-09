@@ -156,6 +156,8 @@
   font-size: 14px;
   transition: all 0.2s;
   background: white;
+  min-height: 44px;
+  box-sizing: border-box;
 }
 
 .form-input:focus,
@@ -181,7 +183,7 @@
 
 .form-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr;
   gap: 16px;
 }
 
@@ -197,7 +199,7 @@
 .react-select__control {
   border: 1px solid #d1d5db !important;
   border-radius: 8px !important;
-  min-height: 42px !important;
+  min-height: 44px !important;
   box-shadow: none !important;
   transition: all 0.2s ease !important;
 }

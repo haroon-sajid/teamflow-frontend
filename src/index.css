@@ -490,10 +490,6 @@ html, body, #root {
 
 
 
-
-
-
-
 /* ===============================
    ADMIN DASHBOARD LAYOUT
    =============================== */
@@ -1062,7 +1058,6 @@ html, body, #root {
   font-weight: bold;
   margin-bottom: 8px;
   background: none; /* Remove gradient */
-  -webkit-background-clip: unset;
   -webkit-text-fill-color: inherit;
 }
 
@@ -1161,7 +1156,7 @@ html, body, #root {
    =============================== */
 
 .main-content {
-  margin-left: 240px;
+  margin-left: 24px;
   padding: 2rem;
   width: calc(100% - 240px);
   min-height: 100vh;

@@ -455,6 +455,13 @@ export function formatTaskDataForDisplay(taskData) {
   return formattedData.sort((a, b) => new Date(a.date) - new Date(b.date));
 }
 
+
+
+
+
+
+
+
 // Calculate total hours for a user across all tasks
 export function calculateTotalTaskHoursForUser(taskData) {
   if (!taskData || !taskData.daily_totals) return 0;
@@ -599,37 +606,37 @@ export function validateDateRange(start, end) {
 }
 
 /* --------------------  GET WORKLOGS SUMMARY (TWH & TTT)  -------------------- */
-export async function getWorklogsSummary(filters = {}) {
-  try {
-    const organizationId = getOrganizationId();
+// export async function getWorklogsSummary(filters = {}) {
+//   try {
+//     const organizationId = getOrganizationId();
     
-    const params = new URLSearchParams({
-      organization_id: organizationId,
-      ...filters
-    });
+//     const params = new URLSearchParams({
+//       organization_id: organizationId,
+//       ...filters
+//     });
 
-    const res = await fetch(`${API_URL}/timesheet/worklogs/summary?${params}`, {
-      headers: authHeaders(),
-    });
+//     const res = await fetch(`${API_URL}/timesheet/worklogs/summary?${params}`, {
+//       headers: authHeaders(),
+//     });
 
-    const result = await res.json();
-    if (!res.ok) {
-      if (res.status === 401 || res.status === 403) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("user");
-        localStorage.removeItem("organizationId");
-        window.location.href = "/login";
-      }
-      const msg = result.detail || result.message || "Failed to fetch worklogs summary";
-      throw new Error(msg);
-    }
+//     const result = await res.json();
+//     if (!res.ok) {
+//       if (res.status === 401 || res.status === 403) {
+//         localStorage.removeItem("token");
+//         localStorage.removeItem("user");
+//         localStorage.removeItem("organizationId");
+//         window.location.href = "/login";
+//       }
+//       const msg = result.detail || result.message || "Failed to fetch worklogs summary";
+//       throw new Error(msg);
+//     }
 
-    return result;
-  } catch (error) {
-    console.error("❌ Error fetching worklogs summary:", error);
-    throw error;
-  }
-}
+//     return result;
+//   } catch (error) {
+//     console.error("❌ Error fetching worklogs summary:", error);
+//     throw error;
+//   }
+// }
 
 /* --------------------  GET DAILY TASKS  -------------------- */
 export async function getDailyTasks(targetDate) {
@@ -717,6 +724,45 @@ function toDayStart(dateVal) {
 }
 
 
+
+
+
+
+/* --------------------  GET EMPLOYEE WORKLOGS SUMMARY (TWH & TTT)  -------------------- */
+export async function getWorklogsSummary(filters = {}) {
+  try {
+    const organizationId = getOrganizationId();
+    
+    const params = new URLSearchParams({
+      organization_id: organizationId,
+      ...filters
+    });
+
+    const res = await fetch(`${API_URL}/timesheet/worklogs/employee-summary?${params}`, {
+      headers: authHeaders(),
+    });
+
+    const result = await res.json();
+    if (!res.ok) {
+      if (res.status === 401 || res.status === 403) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        localStorage.removeItem("organizationId");
+        window.location.href = "/login";
+      }
+      const msg = result.detail || result.message || "Failed to fetch employee worklogs summary";
+      throw new Error(msg);
+    }
+
+    return result;
+  } catch (error) {
+    console.error("❌ Error fetching employee worklogs summary:", error);
+    throw error;
+  }
+}
+
+
+
 /* --------------------  EXPORT ALL FUNCTIONS  -------------------- */
 export default {
   // New range functions
@@ -735,6 +781,7 @@ export default {
   getTaskStatistics,
   filterTasksByProject,
   getFilteredUserTasks,
+  getWorklogsSummary,
   
   // Existing timesheet functions
   getTimesheets,

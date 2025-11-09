@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useContext } from "react";
 import Select from "react-select";
 import { AuthContext } from "../../context/AuthContext";
@@ -28,6 +29,7 @@ export default function TaskModal({
   const [projectId, setProjectId] = useState("");
   const [memberIds, setMemberIds] = useState([]);
   const [priority, setPriority] = useState("low");
+  const [startDate, setStartDate] = useState("");
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState(column);
   const [allowMemberEdit, setAllowMemberEdit] = useState(false);
@@ -62,6 +64,7 @@ export default function TaskModal({
       }
 
       setPriority(editing.priority || "low");
+      setStartDate(editing.start_date ? editing.start_date.split('T')[0] : "");
       setDueDate(editing.due_date ? editing.due_date.split('T')[0] : "");
       setStatus(editing.status || column);
     } else {
@@ -70,6 +73,7 @@ export default function TaskModal({
       setProjectId("");
       setMemberIds([]);
       setPriority("low");
+      setStartDate("");
       setDueDate("");
       setStatus(column);
       setAllowMemberEdit(false);
@@ -154,13 +158,24 @@ const handleSubmit = async (e) => {
     return;
   }
 
-  // Validate due_date format (ISO 8601)
+  // Validate date formats (ISO 8601)
+  let formattedStartDate = null;
   let formattedDueDate = null;
+  
+  if (startDate) {
+    try {
+      formattedStartDate = new Date(startDate).toISOString();
+    } catch (err) {
+      toast.error("Invalid start date format");
+      return;
+    }
+  }
+  
   if (dueDate) {
     try {
       formattedDueDate = new Date(dueDate).toISOString();
     } catch (err) {
-      toast.error("Invalid date format");
+      toast.error("Invalid due date format");
       return;
     }
   }
@@ -173,6 +188,7 @@ const handleSubmit = async (e) => {
     project_id: parseInt(projectId),
     member_ids: memberIds || [], // ✅  Always send array
     priority,
+    start_date: formattedStartDate,
     due_date: formattedDueDate,
     status,
     allow_member_edit: allowMemberEdit
@@ -264,6 +280,17 @@ const handleSubmit = async (e) => {
                 {/* Right Column */}
                 <div className="form-column">
                   <div className="form-group">
+                    <label className="form-label">Start Date</label>
+                    <input
+                      type="date"
+                      className="form-input"
+                      value={startDate}
+                      onChange={(e) => canEditFields && setStartDate(e.target.value)}
+                      disabled={!canEditFields}
+                    />
+                  </div>
+
+                  <div className="form-group">
                     <label className="form-label">Due Date</label>
                     <input
                       type="date"
@@ -288,8 +315,6 @@ const handleSubmit = async (e) => {
                       classNamePrefix="react-select"
                     />
                   </div>
-
-
                 </div>
               </div>
               
@@ -422,4 +447,3 @@ const handleSubmit = async (e) => {
     </div>
   );
 }
-
