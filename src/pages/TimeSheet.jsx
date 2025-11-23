@@ -44,7 +44,6 @@ const TimeSheet = () => {
   const [showTimeLogModal, setShowTimeLogModal] = useState(false);
   const [selectedEmployee, setSelectedEmployee] = useState(null);
 
-  // ... existing statusMap and adminName ...
 
   const statusMap = {
     open: "Open",
@@ -52,7 +51,7 @@ const TimeSheet = () => {
     "inprogress": "In Progress",
     "in-progress": "In Progress",
     qa: "In QA",
-    inqa: "In QA",
+    "In QA": "in_qa",
     "in_qa": "In QA",
     done: "Done",
   };

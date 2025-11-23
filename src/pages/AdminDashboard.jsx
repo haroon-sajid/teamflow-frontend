@@ -61,7 +61,7 @@ export default function AdminDashboard() {
       const projectCount = Array.isArray(projectsData) ? projectsData.length : 0;
       const taskCount = Array.isArray(tasksData) ? tasksData.length : 0;
       const completedTaskCount = Array.isArray(tasksData)
-        ? tasksData.filter((task) => task.status === "Done" || task.status === "Completed").length
+        ? tasksData.filter((task) => task.status?.toLowerCase() === "done" || task.status?.toLowerCase() === "completed").length
         : 0;
       const memberCount = Array.isArray(membersData) ? membersData.length : 0;
 

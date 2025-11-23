@@ -15,7 +15,7 @@ const reverseStatusMap = {
   "Open": "open",
   "To Do": "todo",
   "In Progress": "in-progress",
-  "In QA": "qa",
+  "In QA": "in_qa",  
   "Done": "done",
 };
 
@@ -124,6 +124,7 @@ export default function MemberDashboard() {
         "in-progress": "In Progress",
         inprogress: "In Progress",
         qa: "In QA",
+        "in_qa": "In QA",  
         done: "Done",
       };
 
@@ -236,12 +237,14 @@ export default function MemberDashboard() {
   const updateTaskStatus = async (taskId, newStatus) => {
     try {
       const statusMap = {
-        "Open": "Open",
-        "To Do": "To Do",
-        "In Progress": "In Progress",
-        "In QA": "In QA",
-        "Done": "Done"
-      };
+          open: "Open",
+          todo: "To Do",
+          "in-progress": "In Progress",
+          inprogress: "In Progress",
+          qa: "In QA",
+          "in_qa": "In QA",  
+          done: "Done",
+        };
 
       const normalizedStatus = statusMap[newStatus] || newStatus;
 
@@ -306,6 +309,8 @@ export default function MemberDashboard() {
           todo: "To Do",
           "in-progress": "In Progress",
           inprogress: "In Progress",
+          "in_qa": "In QA",  // This will now match
+          inqa: "In QA",
           qa: "In QA",
           done: "Done",
         };
@@ -313,7 +318,8 @@ export default function MemberDashboard() {
         const normalized = {
           ...selectedTask,
           ...updated,
-          status: statusMap[updated.status?.toLowerCase().replace(/[-\s]/g, "")] || updated.status || taskData.status
+          status: statusMap[updated.status?.toLowerCase().replace(/\s/g, "")] || updated.status || taskData.status
+          // Only remove spaces ↑, keep underscores and dashes
         };
 
         setTasks(prev => prev.map(t => t.id === selectedTask.id ? normalized : t));
@@ -326,13 +332,14 @@ export default function MemberDashboard() {
       const updatedTask = await updateTask(selectedTask.id, taskData);
       // Normalize status for UI (same mapping)
       const statusMap = {
-        open: "Open",
-        todo: "To Do",
-        "in-progress": "In Progress",
-        inprogress: "In Progress",
-        qa: "In QA",
-        done: "Done",
-      };
+          open: "Open",
+          todo: "To Do",
+          "in-progress": "In Progress",
+          inprogress: "In Progress",
+          qa: "In QA",
+          "in_qa": "In QA",  
+          done: "Done",
+        };
       const normalizedTask = {
         ...updatedTask,
         status: statusMap[updatedTask.status?.toLowerCase().replace(/[-\s]/g, "")] || updatedTask.status

@@ -37,6 +37,7 @@ const Kanban = forwardRef((props, ref) => {
 
   const adminName = localStorage.getItem("userName") || "Admin";
 
+// Your frontend mapping
   const statusMap = {
     open: "Open",
     todo: "To Do",
@@ -48,13 +49,13 @@ const Kanban = forwardRef((props, ref) => {
     done: "Done",
   };
 
-  const reverseStatusMap = {
-    "Open": "open",
-    "To Do": "todo",
-    "In Progress": "in-progress",
-    "In QA": "in_qa",
-    "Done": "done",
-  };
+const reverseStatusMap = {
+  "Open": "open",
+  "To Do": "todo",
+  "In Progress": "in-progress",
+  "In QA": "in_qa", 
+  "Done": "done",
+};
 
   const loadTasks = async () => {
     if (projects.length === 0 || users.length === 0) return;
@@ -166,61 +167,73 @@ const Kanban = forwardRef((props, ref) => {
   };
 
   const saveTask = async (payload) => {
-    try {
-      const backendStatus = reverseStatusMap[payload.status] || payload.status.toLowerCase().replace(/ /g, "-");
-      const taskPayload = { ...payload, status: backendStatus };
+  try {
+    const backendStatus = reverseStatusMap[payload.status] || payload.status.toLowerCase().replace(/ /g, "-");
+    
+    const taskPayload = { 
+      ...payload, 
+      status: backendStatus,
+      // Ensure member_ids is preserved as an array
+      member_ids: payload.member_ids || []
+    };
 
-      // Remove undefined and empty fields
-      Object.keys(taskPayload).forEach(
-        key => taskPayload[key] === undefined && delete taskPayload[key]
-      );
-
-      // Members: only send status if allow_member_edit = false
-      const userRole = localStorage.getItem("userRole") || "";
-      if (userRole === "MEMBER" && !payload.allow_member_edit) {
-        // Send only status
-        const statusOnlyPayload = { status: backendStatus };
-        const updated = await updateTask(payload.id, statusOnlyPayload);
-        toast.success("Task status updated successfully!");
-        closeTaskModal();
-        loadTasks();
-        return;
+    // Remove undefined and empty fields (but keep member_ids even if empty array)
+    Object.keys(taskPayload).forEach(key => {
+      if (taskPayload[key] === undefined) {
+        delete taskPayload[key];
       }
+    });
 
-      // Admin or editable members
-      let updatedTask;
-      if (payload.id) {
-        updatedTask = await updateTask(payload.id, taskPayload);
-        toast.success("Task updated successfully!");
-      } else {
-        updatedTask = await createTask(taskPayload);
-        toast.success("Task created successfully!");
-      }
-
-      const project = projects.find(p => p.id === updatedTask.project_id);
-      const members = updatedTask.member_ids?.map(id => users.find(u => u.id === id)).filter(Boolean) || [];
-      const statusKey = updatedTask.status.toLowerCase().replace(/[-\s]/g, "");
-      const displayStatus = statusMap[statusKey] || "Open";
-
-      const normalizedTask = {
-        ...updatedTask,
-        status: displayStatus,
-        project_name: project?.title || "Unknown Project",
-        members,
-        created_by_name: adminName,
-      };
-
-      setTasks(prev => payload.id
-        ? prev.map(t => t.id === payload.id ? normalizedTask : t)
-        : [...prev, normalizedTask]
-      );
-
+    // Members: only send status if allow_member_edit = false
+    const userRole = localStorage.getItem("userRole") || "";
+    if (userRole === "MEMBER" && !payload.allow_member_edit) {
+      // Send only status
+      const statusOnlyPayload = { status: backendStatus };
+      const updated = await updateTask(payload.id, statusOnlyPayload);
+      toast.success("Task status updated successfully!");
       closeTaskModal();
-    } catch (e) {
-      console.error("Save task error:", e);
-      toast.error(e.message || "Task operation failed");
+      loadTasks();
+      return;
     }
-  };
+
+    // Admin or editable members
+    let updatedTask;
+    if (payload.id) {
+      // ✅ FIXED: Ensure member_ids is sent for updates
+      console.log("🔄 Updating task with payload:", taskPayload);
+      updatedTask = await updateTask(payload.id, taskPayload);
+      toast.success("Task updated successfully!");
+    } else {
+      // ✅ FIXED: Ensure member_ids is sent for creation
+      console.log("🆕 Creating task with payload:", taskPayload);
+      updatedTask = await createTask(taskPayload);
+      toast.success("Task created successfully!");
+    }
+
+    const project = projects.find(p => p.id === updatedTask.project_id);
+    const members = updatedTask.member_ids?.map(id => users.find(u => u.id === id)).filter(Boolean) || [];
+    const statusKey = updatedTask.status.toLowerCase().replace(/[-\s]/g, "");
+    const displayStatus = statusMap[statusKey] || "Open";
+
+    const normalizedTask = {
+      ...updatedTask,
+      status: displayStatus,
+      project_name: project?.title || "Unknown Project",
+      members,
+      created_by_name: adminName,
+    };
+
+    setTasks(prev => payload.id
+      ? prev.map(t => t.id === payload.id ? normalizedTask : t)
+      : [...prev, normalizedTask]
+    );
+
+    closeTaskModal();
+  } catch (e) {
+    console.error("Save task error:", e);
+    toast.error(e.message || "Task operation failed");
+  }
+};
 
   const editTask = (task) => openEditModal(task.status, task);
 

@@ -55,8 +55,13 @@ export default function TaskModal({
       setProjectId(editing.project_id || "");
       setAllowMemberEdit(editing.allow_member_edit || false);
 
+      // ✅ FIXED: Better member IDs extraction
       if (editing.member_ids && Array.isArray(editing.member_ids)) {
         setMemberIds(editing.member_ids);
+      } else if (editing.members && Array.isArray(editing.members)) {
+        // Extract IDs from member objects
+        const ids = editing.members.map(member => member.id).filter(Boolean);
+        setMemberIds(ids);
       } else if (editing.member_id) {
         setMemberIds([editing.member_id]);
       } else {
@@ -135,8 +140,8 @@ export default function TaskModal({
   };
 
   const handleAddWorkLog = async (logData) => {
-  try {
-    const result = await postTaskWorkLog(editing.id, logData);
+    try {
+      const result = await postTaskWorkLog(editing.id, logData);
 
       if (result.ok) {
         setWorkLogs(prev => [...prev, result.data]);
@@ -149,76 +154,94 @@ export default function TaskModal({
     }
   };
 
-
-  // In TaskModal.jsx -  handleSubmit function
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!title.trim() || !projectId) { // ✅ REMOVED memberIds validation
-    toast.error("Please fill all required fields");
-    return;
-  }
-
-  // Validate date formats (ISO 8601)
-  let formattedStartDate = null;
-  let formattedDueDate = null;
-  
-  if (startDate) {
-    try {
-      formattedStartDate = new Date(startDate).toISOString();
-    } catch (err) {
-      toast.error("Invalid start date format");
+  // handleSubmit function with proper member assignment
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    // Validate required fields including memberIds
+    if (!title.trim() || !projectId || memberIds.length === 0) {
+      toast.error("Please fill all required fields including assigning at least one member");
       return;
     }
-  }
-  
-  if (dueDate) {
-    try {
-      formattedDueDate = new Date(dueDate).toISOString();
-    } catch (err) {
-      toast.error("Invalid due date format");
-      return;
-    }
-  }
 
-  // ✅ FIXED: Ensure member_ids is always an array, even if empty
-  const payload = {
-    id: editing?.id,
-    title,
-    description,
-    project_id: parseInt(projectId),
-    member_ids: memberIds || [], // ✅  Always send array
-    priority,
-    start_date: formattedStartDate,
-    due_date: formattedDueDate,
-    status,
-    allow_member_edit: allowMemberEdit
+    // Validate date formats (ISO 8601)
+    let formattedStartDate = null;
+    let formattedDueDate = null;
+    
+    if (startDate) {
+      try {
+        formattedStartDate = new Date(startDate).toISOString();
+      } catch (err) {
+        toast.error("Invalid start date format");
+        return;
+      }
+    }
+    
+    if (dueDate) {
+      try {
+        formattedDueDate = new Date(dueDate).toISOString();
+      } catch (err) {
+        toast.error("Invalid due date format");
+        return;
+      }
+    }
+
+    // ✅ FIXED: Proper payload with member_ids array
+    const payload = {
+      id: editing?.id,
+      title: title.trim(),
+      description: description.trim(),
+      project_id: parseInt(projectId),
+      member_ids: Array.isArray(memberIds) ? memberIds : [], // ✅ Ensure it's always an array
+      priority,
+      start_date: formattedStartDate,
+      due_date: formattedDueDate,
+      status,
+      allow_member_edit: allowMemberEdit
+    };
+
+    // ✅ DEBUG: Log the payload to see what's being sent
+    console.log("📤 Sending task payload:", payload);
+    console.log("👥 Selected member IDs:", memberIds);
+    console.log("👤 Available users:", users);
+
+    try {
+      await onSave(payload);
+      onClose();
+    } catch (error) {
+      console.error("Error saving task:", error);
+      toast.error(error.message || "Task operation failed");
+    }
   };
 
-  try {
-    await onSave(payload);
-    onClose();
-  } catch (error) {
-    console.error("Error saving task:", error);
-    toast.error(error.message || "Task operation failed");
-  }
-};
-
-
   const currentUserOrgId = localStorage.getItem("organizationId");
-  const orgUsers = users.filter(user => 
-    user.organization_id === parseInt(currentUserOrgId) && 
-    user.role === "member"
-  );
+  
+  // ✅ FIXED: Better user filtering logic
+  const orgUsers = users.filter(user => {
+    // Check if user has organization_id property and matches current org
+    const hasOrgId = user.organization_id !== undefined && user.organization_id !== null;
+    const orgMatch = hasOrgId ? user.organization_id === parseInt(currentUserOrgId) : true;
+    
+    // Only include members (not admins) for assignment
+    const isMemberRole = user.role === "member";
+    
+    return orgMatch && isMemberRole;
+  });
 
   const formattedUsers = orgUsers.map((user) => ({
     value: user.id,
     label: `${user.full_name || user.email.split('@')[0]} (${user.email})`,
   }));
 
+  // ✅ FIXED: Better member change handler
   const handleMemberChange = (selectedOptions) => {
     const ids = selectedOptions ? selectedOptions.map((opt) => opt.value) : [];
+    console.log("🔄 Selected member IDs:", ids); // Debug log
     setMemberIds(ids);
   };
+
+  // Get currently selected members for display
+  const selectedMembers = formattedUsers.filter(user => memberIds.includes(user.value));
 
   return (
     <div className="task-modal-overlay" onClick={onClose}>
@@ -262,6 +285,7 @@ const handleSubmit = async (e) => {
                       onChange={(e) => canEditFields && setTitle(e.target.value)}
                       required
                       disabled={!canEditFields}
+                      placeholder="Enter task title"
                     />
                   </div>
 
@@ -273,6 +297,7 @@ const handleSubmit = async (e) => {
                       onChange={(e) => canEditFields && setDescription(e.target.value)}
                       rows="4"
                       disabled={!canEditFields}
+                      placeholder="Enter task description"
                     />
                   </div>
                 </div>
@@ -306,14 +331,21 @@ const handleSubmit = async (e) => {
                     <Select
                       isMulti
                       options={formattedUsers}
-                      value={formattedUsers.filter(user => memberIds.includes(user.value))}
+                      value={selectedMembers}
                       onChange={canEditAssignments ? handleMemberChange : undefined}
-                      placeholder="Select members..."
+                      placeholder="Select at least one member..."
                       required
                       isDisabled={!canEditAssignments}
                       className="react-select-container"
                       classNamePrefix="react-select"
                     />
+                    {/* ✅ FIXED: Show member count for clarity */}
+                    <div className="member-count">
+                      {memberIds.length} member(s) selected
+                    </div>
+                    {memberIds.length === 0 && (
+                      <div className="form-error">Please select at least one member</div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -369,6 +401,20 @@ const handleSubmit = async (e) => {
                   </select>
                 </div>
               </div>
+
+              {/* ✅ FIXED: Allow Member Edit toggle for admins only */}
+              {isAdmin && !viewOnly && (
+                <div className="form-group checkbox-group">
+                  <label className="checkbox-label">
+                    <input
+                      type="checkbox"
+                      checked={allowMemberEdit}
+                      onChange={(e) => setAllowMemberEdit(e.target.checked)}
+                    />
+                    <span className="checkbox-text">Allow members to edit this task</span>
+                  </label>
+                </div>
+              )}
             </section>
 
             {/* Tabs for Work Logs and Comments */}
@@ -390,7 +436,6 @@ const handleSubmit = async (e) => {
                 </button>
               </div>
 
-
               <div className="tab-content">
                 {activeTab === 'comments' && (
                   <section className="comments-section">
@@ -405,18 +450,17 @@ const handleSubmit = async (e) => {
                 )}
                 
                 {activeTab === 'worklogs' && (
-                <section className="worklog-section">
-                  <WorkLogSection
-                    workLogs={workLogs}
-                    onAddWorkLog={handleAddWorkLog}
-                    user={user}
-                    isLoading={workLogsLoading}
-                    disabled={viewOnly}
-                    showInput={true} //  ensures WorkLogSection displays input (like CommentSection)
-                  />
-                </section>
-              )}
-
+                  <section className="worklog-section">
+                    <WorkLogSection
+                      workLogs={workLogs}
+                      onAddWorkLog={handleAddWorkLog}
+                      user={user}
+                      isLoading={workLogsLoading}
+                      disabled={viewOnly}
+                      showInput={true}
+                    />
+                  </section>
+                )}
               </div>
             </div>
 
@@ -437,6 +481,7 @@ const handleSubmit = async (e) => {
               type="submit"
               className="btn btn-primary"
               onClick={handleSubmit}
+              disabled={!title.trim() || !projectId || memberIds.length === 0}
             >
               {editing ? "Update Task" : "Create Task"}
             </button>

@@ -6,7 +6,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { getProjects } from "../api/projects.js";
 import { getTasks } from "../api/tasks.js";
 import toast from 'react-hot-toast';
-import { getOrganizationMembers, getOrganizationMemberStats as getUsers } from "../api/getMembers";
+import { getOrganizationMembers } from "../api/getMembers";
 
 const COLORS = ['#4f46e5', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6'];
 
@@ -22,72 +22,108 @@ export default function AnalyticsDashboard() {
     loadData();
   }, []);
 
-  
-      const loadData = async () => {
-      try {
-        setLoading(true);
-        const [projectsData, tasksData, membersData] = await Promise.all([
-          getProjects(),
-          getTasks(),
-          getOrganizationMembers(),
-        ]);
+  const loadData = async () => {
+    try {
+      setLoading(true);
+      const [projectsData, tasksData, membersData] = await Promise.all([
+        getProjects(),
+        getTasks(),
+        getOrganizationMembers(),
+      ]);
 
-        setProjects(projectsData);
-        setTasks(tasksData);
-        setUsers(
-          Array.isArray(membersData)
-            ? membersData.filter(u => u.role === 'member')
-            : []
-        );
-      } catch (error) {
-        console.error('Failed to load analytics data:', error);
-        toast.error('Failed to load analytics data');
-      } finally {
-        setLoading(false);
-      }
-    };
+      console.log('📊 Loaded tasks:', tasksData);
+      console.log('👥 Loaded members:', membersData);
 
-  // Calculate project metrics
-  const projectMetrics = {
-    totalProjects: projects.length,
-    activeProjects: projects.filter(p => p.status === 'active').length,
-    completedProjects: projects.filter(p => p.status === 'completed').length,
-    overdueProjects: projects.filter(p => new Date(p.due_date) < new Date() && p.status !== 'completed').length
+      setProjects(projectsData);
+      setTasks(tasksData);
+      setUsers(
+        Array.isArray(membersData)
+          ? membersData.filter(u => u.role === 'member')
+          : []
+      );
+    } catch (error) {
+      console.error('Failed to load analytics data:', error);
+      toast.error('Failed to load analytics data');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Calculate task metrics
+  // ✅ IMPROVED: Better task status detection
+  const normalizeStatus = (status) => {
+    if (!status) return 'unknown';
+    
+    const statusLower = status.toLowerCase().trim();
+    
+    if (statusLower.includes('open') || statusLower.includes('to do') || statusLower === 'to_do') {
+      return 'open';
+    }
+    if (statusLower.includes('progress') || statusLower === 'in_progress') {
+      return 'in_progress';
+    }
+    if (statusLower.includes('qa') || statusLower === 'in_qa') {
+      return 'in_qa';
+    }
+    if (statusLower.includes('done') || statusLower.includes('complete')) {
+      return 'done';
+    }
+    
+    return statusLower;
+  };
+
+  // ✅ FIXED: Task metrics with normalized status
   const taskMetrics = {
     totalTasks: tasks.length,
-    openTasks: tasks.filter(t => t.status === 'Open').length,
-    inProgressTasks: tasks.filter(t => t.status === 'In Progress').length,
-    completedTasks: tasks.filter(t => t.status === 'Done').length,
-    overdueTasks: tasks.filter(t => new Date(t.due_date) < new Date() && t.status !== 'Done').length
+    openTasks: tasks.filter(t => normalizeStatus(t.status) === 'open').length,
+    inProgressTasks: tasks.filter(t => normalizeStatus(t.status) === 'in_progress').length,
+    completedTasks: tasks.filter(t => normalizeStatus(t.status) === 'done').length,
+    overdueTasks: tasks.filter(t => 
+      t.due_date && 
+      new Date(t.due_date) < new Date() && 
+      normalizeStatus(t.status) !== 'done'
+    ).length
   };
 
-  // Task distribution by status
+  // ✅ FIXED: Task status data
   const taskStatusData = [
     { name: 'Open', value: taskMetrics.openTasks },
-    { name: 'To Do', value: tasks.filter(t => t.status === 'To Do').length },
     { name: 'In Progress', value: taskMetrics.inProgressTasks },
-    { name: 'In QA', value: tasks.filter(t => t.status === 'In QA').length },
+    { name: 'In QA', value: tasks.filter(t => normalizeStatus(t.status) === 'in_qa').length },
     { name: 'Done', value: taskMetrics.completedTasks }
   ];
 
-  // Task distribution by priority
+  // Task priority data
   const taskPriorityData = [
     { name: 'High', value: tasks.filter(t => t.priority === 'high').length },
     { name: 'Medium', value: tasks.filter(t => t.priority === 'medium').length },
     { name: 'Low', value: tasks.filter(t => t.priority === 'low').length }
   ];
 
-  // Member performance data
+  // ✅ FIXED: Member performance with proper task assignment
   const memberPerformanceData = users.map(user => {
-    const userTasks = tasks.filter(task => 
-      task.member_ids?.includes(user.id) || task.member_id === user.id
-    );
+    // Find tasks assigned to this user - handle both member_ids array and member_names
+    const userTasks = tasks.filter(task => {
+      // Check member_ids array
+      if (task.member_ids && Array.isArray(task.member_ids)) {
+        return task.member_ids.includes(user.id);
+      }
+      // Check member_names array (if available from backend)
+      if (task.member_names && Array.isArray(task.member_names)) {
+        const userFullName = user.full_name || user.email.split('@')[0];
+        return task.member_names.some(name => 
+          name.toLowerCase().includes(userFullName.toLowerCase())
+        );
+      }
+      // Fallback to member_id single value
+      return task.member_id === user.id;
+    });
     
-    const completedTasks = userTasks.filter(task => task.status === 'Done').length;
+    console.log(`📋 User ${user.full_name} tasks:`, userTasks);
+
+    const completedTasks = userTasks.filter(t => normalizeStatus(t.status) === 'done').length;
+    const inProgressTasks = userTasks.filter(t => normalizeStatus(t.status) === 'in_progress').length;
     const totalTasks = userTasks.length;
+    
     const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
     
     return {
@@ -95,14 +131,17 @@ export default function AnalyticsDashboard() {
       id: user.id,
       totalTasks,
       completedTasks,
+      inProgressTasks,
       progress: progressPercentage,
       overdueTasks: userTasks.filter(task => 
-        new Date(task.due_date) < new Date() && task.status !== 'Done'
+        task.due_date && 
+        new Date(task.due_date) < new Date() && 
+        normalizeStatus(task.status) !== 'done'
       ).length
     };
   }).sort((a, b) => b.progress - a.progress);
 
-  // Project timeline data (simulated)
+  // Project timeline data
   const projectTimelineData = [
     { date: 'Jan', projects: 4 },
     { date: 'Feb', projects: 6 },
@@ -111,6 +150,11 @@ export default function AnalyticsDashboard() {
     { date: 'May', projects: 15 },
     { date: 'Jun', projects: 18 }
   ];
+
+  // Debug logs
+  console.log('📈 Task Metrics:', taskMetrics);
+  console.log('🏆 Member Performance:', memberPerformanceData);
+  console.log('🔍 All task statuses:', tasks.map(t => ({ id: t.id, status: t.status, normalized: normalizeStatus(t.status) })));
 
   if (loading) {
     return (
@@ -198,7 +242,7 @@ export default function AnalyticsDashboard() {
               </div>
               <div className="metric-info">
                 <p className="metric-label">Total Projects</p>
-                <p className="metric-value">{projectMetrics.totalProjects}</p>
+                <p className="metric-value">{projects.length}</p>
                 <div className="metric-change positive">
                   <span>+2.5%</span> from last month
                 </div>
@@ -275,7 +319,7 @@ export default function AnalyticsDashboard() {
               <div className="chart-container">
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
-                     <Pie
+                    <Pie
                       data={taskStatusData}
                       cx="50%"
                       cy="50%"
@@ -284,7 +328,6 @@ export default function AnalyticsDashboard() {
                       fill="#8884d8"
                       dataKey="value"
                       label={({ name, percent, index }) => {
-                        // Only show label if value is > 0
                         if (taskStatusData[index].value === 0) return '';
                         return `${name}: ${(percent * 100).toFixed(0)}%`;
                       }}
@@ -346,14 +389,6 @@ export default function AnalyticsDashboard() {
                   </svg>
                   Filter
                 </button>
-                <button className="btn-primary">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="10"></circle>
-                    <line x1="12" y1="8" x2="12" y2="16"></line>
-                    <line x1="8" y1="12" x2="16" y2="12"></line>
-                  </svg>
-                  Add Member
-                </button>
               </div>
             </div>
             
@@ -364,6 +399,7 @@ export default function AnalyticsDashboard() {
                     <th>Member</th>
                     <th>Total Tasks</th>
                     <th>Completed</th>
+                    <th>In Progress</th>
                     <th>Progress</th>
                     <th>Overdue</th>
                     <th>Productivity</th>
@@ -382,6 +418,7 @@ export default function AnalyticsDashboard() {
                       </td>
                       <td>{member.totalTasks}</td>
                       <td>{member.completedTasks}</td>
+                      <td>{member.inProgressTasks}</td>
                       <td>
                         <div className="progress-bar">
                           <div 
