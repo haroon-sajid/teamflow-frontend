@@ -1,8 +1,8 @@
 // src/pages/CreateProjects.jsx
 import { createProject, getProjects, updateProject, deleteProject } from "../api/projects.js";
 import { useState, useEffect } from "react";
-import Layout from "../components/Layout.jsx";
-import Header from "../components/Header.jsx";
+import Layout from "../components/layout/Layout.jsx";
+import Header from "../components/layout/Header.jsx";
 import ProjectModal from "../components/modals/ProjectModal.jsx"
 import ConfirmationModal from "../components/modals/ConfirmationModal.jsx";
 import toast from "react-hot-toast";
@@ -12,13 +12,13 @@ export default function ProjectManagement() {
   const [projects, setProjects] = useState([]);
   const [showModal, setShowModal] = useState(false);
   const [editing, setEditing] = useState(null);
-  
+
   // Add states for confirmation modal
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationConfig, setConfirmationConfig] = useState({
     title: "",
     message: "",
-    onConfirm: () => {}
+    onConfirm: () => { }
   });
 
   // Form state for modal
@@ -173,14 +173,14 @@ export default function ProjectManagement() {
                     <td>{proj.description}</td>
                     <td className="action-col">
                       <div className="project-actions">
-                        <button 
-                          className="project-edit-btn" 
+                        <button
+                          className="project-edit-btn"
                           onClick={() => openEdit(proj)}
                         >
                           Edit
                         </button>
-                        <button 
-                          className="project-delete-btn" 
+                        <button
+                          className="project-delete-btn"
                           onClick={() => handleDelete(proj.id)}
                         >
                           Delete

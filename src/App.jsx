@@ -1,5 +1,5 @@
 // src/App.jsx
-import React from "react";
+
 import "./index.css";
 import { Routes, Route } from "react-router-dom";
 import { Toaster } from "react-hot-toast";

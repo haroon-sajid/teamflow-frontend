@@ -1,7 +1,7 @@
-import Layout from "../components/Layout";
-import Header from "../components/Header.jsx";
+import Layout from "../components/layout/Layout";
+import Header from "../components/layout/Header.jsx";
 import { useEffect, useState, useContext } from "react";
-import TaskCard from "../components/TaskCard";
+import TaskCard from "../components/tasks/TaskCard";
 import TaskModal from "../components/modals/TaskModal";
 import { getTasks, updateTask, deleteTask, updateTaskStatusOnly } from "../api/tasks.js";
 import { getProjects } from "../api/projects.js";
@@ -15,7 +15,7 @@ const reverseStatusMap = {
   "Open": "open",
   "To Do": "todo",
   "In Progress": "in-progress",
-  "In QA": "in_qa",  
+  "In QA": "in_qa",
   "Done": "done",
 };
 
@@ -87,7 +87,7 @@ export default function MemberDashboard() {
     try {
       setLoading(true);
       console.log("🔄 Loading member dashboard data...");
-      
+
       // Load tasks with error handling
       let tasksData = [];
       try {
@@ -124,7 +124,7 @@ export default function MemberDashboard() {
         "in-progress": "In Progress",
         inprogress: "In Progress",
         qa: "In QA",
-        "in_qa": "In QA",  
+        "in_qa": "In QA",
         done: "Done",
       };
 
@@ -165,7 +165,7 @@ export default function MemberDashboard() {
         createMinimalUserSet(normalizedTasks);
         console.log("ℹ️ Member role - using minimal user set");
       }
-      
+
     } catch (error) {
       console.error("❌ Unexpected error in loadAllData:", error);
       toast.error("Failed to load dashboard data");
@@ -217,64 +217,25 @@ export default function MemberDashboard() {
 
   useEffect(() => {
     console.log("🎯 useEffect triggered in MemberDashboard");
-    
+
     // Wait for auth to load, then load data
     if (!authLoading) {
       if (memberId && userOrgId) {
         loadAllData();
       } else {
-        console.warn("⚠️ Missing required user data:", { 
-          memberId, 
-          userOrgId, 
+        console.warn("⚠️ Missing required user data:", {
+          memberId,
+          userOrgId,
           authLoading,
           hasToken: !!localStorage.getItem("token")
         });
         setLoading(false);
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [memberId, userOrgId, authLoading]);
 
-  const updateTaskStatus = async (taskId, newStatus) => {
-    try {
-      const statusMap = {
-          open: "Open",
-          todo: "To Do",
-          "in-progress": "In Progress",
-          inprogress: "In Progress",
-          qa: "In QA",
-          "in_qa": "In QA",  
-          done: "Done",
-        };
 
-      const normalizedStatus = statusMap[newStatus] || newStatus;
-
-      // Try minimal status-only update first (safe for members)
-      let updatedTask;
-      try {
-        updatedTask = await updateTaskStatusOnly(taskId, normalizedStatus);
-      } catch (error) {
-        // If backend doesn't have /status endpoint, fall back to full PUT
-        if (error.message.includes("405") || error.message.includes("Method Not Allowed")) {
-          updatedTask = await updateTask(taskId, { status: normalizedStatus });
-        } else {
-          throw error;
-        }
-      }
-
-      setTasks(prev =>
-        prev.map(t =>
-          t.id === taskId
-            ? { ...t, status: newStatus }
-            : t
-        )
-      );
-
-      toast.success(`Task status updated to "${newStatus}"`);
-    } catch (error) {
-      console.error("Error updating task status:", error);
-      toast.error(error.message || "Failed to update task status");
-    }
-  };
 
   // Task Modal Functions
   const openViewTaskModal = (task) => {
@@ -332,14 +293,14 @@ export default function MemberDashboard() {
       const updatedTask = await updateTask(selectedTask.id, taskData);
       // Normalize status for UI (same mapping)
       const statusMap = {
-          open: "Open",
-          todo: "To Do",
-          "in-progress": "In Progress",
-          inprogress: "In Progress",
-          qa: "In QA",
-          "in_qa": "In QA",  
-          done: "Done",
-        };
+        open: "Open",
+        todo: "To Do",
+        "in-progress": "In Progress",
+        inprogress: "In Progress",
+        qa: "In QA",
+        "in_qa": "In QA",
+        done: "Done",
+      };
       const normalizedTask = {
         ...updatedTask,
         status: statusMap[updatedTask.status?.toLowerCase().replace(/[-\s]/g, "")] || updatedTask.status
@@ -427,7 +388,7 @@ export default function MemberDashboard() {
         />
         <div className="error-state">
           <p>Unable to load user information. Please log in again.</p>
-          <button 
+          <button
             onClick={() => window.location.href = "/login"}
             className="btn btn-primary"
           >
@@ -448,7 +409,7 @@ export default function MemberDashboard() {
       {userRole && (
         <div className={`role-badge ${userRole}`}>
           {userRole === 'member' && '👤 Team Member'}
-          {userRole === 'admin' && '🛠️ Administrator'} 
+          {userRole === 'admin' && '🛠️ Administrator'}
           {userRole === 'super_admin' && '🛡️ Super Administrator'}
         </div>
       )}

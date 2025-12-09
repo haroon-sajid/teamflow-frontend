@@ -1,10 +1,10 @@
 
-import React, { useState, useEffect, useContext } from "react";
+import { useState, useEffect, useContext } from "react";
 import Select from "react-select";
 import { AuthContext } from "../../context/AuthContext";
 import { toast } from "react-hot-toast";
-import CommentSection from "../CommentSection";
-import WorkLogSection from "../WorkLogSection";
+import CommentSection from "../tasks/CommentSection";
+import WorkLogSection from "../tasks/WorkLogSection";
 import "./TaskModal.css";
 
 import {
@@ -33,7 +33,7 @@ export default function TaskModal({
   const [dueDate, setDueDate] = useState("");
   const [status, setStatus] = useState(column);
   const [allowMemberEdit, setAllowMemberEdit] = useState(false);
-  
+
   const [comments, setComments] = useState([]);
   const [workLogs, setWorkLogs] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
@@ -90,6 +90,7 @@ export default function TaskModal({
     if (editing?.id) {
       loadTaskData();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [editing?.id]);
 
   const loadTaskData = async () => {
@@ -123,9 +124,9 @@ export default function TaskModal({
     if (!commentText.trim()) return;
     try {
       const result = await postTaskComment(
-        editing.id, 
-        commentText, 
-        localStorage.getItem("token"), 
+        editing.id,
+        commentText,
+        localStorage.getItem("token"),
         parseInt(localStorage.getItem("organizationId"))
       );
       if (result.ok) {
@@ -157,7 +158,7 @@ export default function TaskModal({
   // handleSubmit function with proper member assignment
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Validate required fields including memberIds
     if (!title.trim() || !projectId || memberIds.length === 0) {
       toast.error("Please fill all required fields including assigning at least one member");
@@ -167,7 +168,7 @@ export default function TaskModal({
     // Validate date formats (ISO 8601)
     let formattedStartDate = null;
     let formattedDueDate = null;
-    
+
     if (startDate) {
       try {
         formattedStartDate = new Date(startDate).toISOString();
@@ -176,7 +177,7 @@ export default function TaskModal({
         return;
       }
     }
-    
+
     if (dueDate) {
       try {
         formattedDueDate = new Date(dueDate).toISOString();
@@ -215,16 +216,16 @@ export default function TaskModal({
   };
 
   const currentUserOrgId = localStorage.getItem("organizationId");
-  
+
   // ✅ FIXED: Better user filtering logic
   const orgUsers = users.filter(user => {
     // Check if user has organization_id property and matches current org
     const hasOrgId = user.organization_id !== undefined && user.organization_id !== null;
     const orgMatch = hasOrgId ? user.organization_id === parseInt(currentUserOrgId) : true;
-    
+
     // Only include members (not admins) for assignment
     const isMemberRole = user.role === "member";
-    
+
     return orgMatch && isMemberRole;
   });
 
@@ -246,14 +247,14 @@ export default function TaskModal({
   return (
     <div className="task-modal-overlay" onClick={onClose}>
       <div className="task-modal-container" onClick={(e) => e.stopPropagation()}>
-        
+
         {/* Header */}
         <div className="task-modal-header">
           <h2 className="task-modal-title">
-            {viewOnly 
-              ? `View Task - ${editing?.title || 'New Task'}` 
-              : editing 
-                ? "Edit Task" 
+            {viewOnly
+              ? `View Task - ${editing?.title || 'New Task'}`
+              : editing
+                ? "Edit Task"
                 : "Create New Task"
             }
           </h2>
@@ -268,12 +269,12 @@ export default function TaskModal({
         {/* Scrollable Body */}
         <div className="task-modal-body">
           <form onSubmit={handleSubmit} className="task-modal-form">
-            
+
             {/* Task Details Section */}
             <section className="task-details-section">
               <h3 className="section-title">Task Details</h3>
               <div className="task-details-grid">
-                
+
                 {/* Left Column */}
                 <div className="form-column">
                   <div className="form-group">
@@ -349,7 +350,7 @@ export default function TaskModal({
                   </div>
                 </div>
               </div>
-              
+
               {/* Dropdowns in one row */}
               <div className="form-row dropdowns-row">
                 <div className="form-group">
@@ -448,7 +449,7 @@ export default function TaskModal({
                     />
                   </section>
                 )}
-                
+
                 {activeTab === 'worklogs' && (
                   <section className="worklog-section">
                     <WorkLogSection

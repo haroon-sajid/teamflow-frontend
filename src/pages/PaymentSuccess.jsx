@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import Layout from "../components/Layout";
-import Header from "../components/Header";
+import Layout from "../components/layout/Layout";
+import Header from "../components/layout/Header";
 import { API_URL } from "../config/apiConfig";
 import "../styles/payment.css";
 
@@ -15,7 +15,7 @@ const PaymentSuccess = () => {
     // Get session_id from URL query parameters
     const urlParams = new URLSearchParams(window.location.search);
     const sessionIdParam = urlParams.get("session_id");
-    
+
     if (sessionIdParam) {
       setSessionId(sessionIdParam);
       verifySession(sessionIdParam);
@@ -23,12 +23,13 @@ const PaymentSuccess = () => {
       setVerificationStatus("error");
       setError("No session ID found in URL");
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const verifySession = async (sessionId) => {
     try {
       console.log("🔄 Verifying Stripe session:", sessionId);
-      
+
       // Use fetch instead of axios to avoid auth headers
       const response = await fetch(
         `${API_URL}/payments/verify-session?session_id=${sessionId}`,
@@ -50,7 +51,7 @@ const PaymentSuccess = () => {
       if (data.status === "complete" && data.payment_status === "paid") {
         setVerificationStatus("success");
         setSessionData(data);
-        
+
         // Store plan info in localStorage for the dashboard to use
         if (data.plan_name) {
           localStorage.setItem("currentPlan", data.plan_name);
@@ -88,7 +89,7 @@ const PaymentSuccess = () => {
             <p className="payment-status-message">
               Thank you for your purchase! Your {sessionData?.plan_name} plan is now active.
             </p>
-            
+
             {sessionData && (
               <div className="payment-details">
                 <div className="payment-detail-item">
@@ -127,8 +128,8 @@ const PaymentSuccess = () => {
               Your payment is being processed. This may take a few minutes.
             </p>
             <div className="payment-status-actions">
-              <button 
-                onClick={() => verifySession(sessionId)} 
+              <button
+                onClick={() => verifySession(sessionId)}
                 className="btn btn--primary"
               >
                 Check Status Again
@@ -169,14 +170,14 @@ const PaymentSuccess = () => {
       <Header
         title="Payment Status"
         subtitle={
-          verificationStatus === "verifying" 
-            ? "Verifying your payment..." 
+          verificationStatus === "verifying"
+            ? "Verifying your payment..."
             : verificationStatus === "success"
-            ? "Your subscription is now active!"
-            : "Payment processing"
+              ? "Your subscription is now active!"
+              : "Payment processing"
         }
       />
-      
+
       <div className="payment-status-page">
         <div className="payment-status-container payment-status-container--centered">
           {renderContent()}

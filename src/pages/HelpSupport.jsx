@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Layout from '../components/Layout';
-import Header from '../components/Header';
+import Layout from '../components/layout/Layout';
+import Header from '../components/layout/Header';
 import "../styles/HelpSupport.css";
 
 const HelpSupport = () => {
@@ -41,7 +41,7 @@ const HelpSupport = () => {
   return (
     <Layout>
       <div className="help-support-page">
-        <Header 
+        <Header
           title="Help & Support"
           subtitle="Get help, find answers, and learn how to make the most of our task management platform."
         />
@@ -59,7 +59,7 @@ const HelpSupport = () => {
                 <div className="faq-list">
                   {faqItems.map((faq) => (
                     <div key={faq.id} className={`faq-item ${activeFaq === faq.id ? 'active' : ''}`}>
-                      <div 
+                      <div
                         className="faq-question"
                         onClick={() => toggleFaq(faq.id)}
                       >
@@ -122,7 +122,7 @@ const HelpSupport = () => {
                   <h2 className="card-title">Resources & Support Hours</h2>
                   <p className="card-description">Additional help resources and availability</p>
                 </div>
-                
+
                 <div className="resources-list">
                   <div className="resource-item">
                     <div className="resource-icon">📚</div>

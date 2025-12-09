@@ -1,8 +1,8 @@
 
 // src/pages/AdminDashboard.jsx
-import Layout from "../components/Layout";
-import Header from "../components/Header.jsx";
-import MembersList from "../components/MembersList";
+import Layout from "../components/layout/Layout";
+import Header from "../components/layout/Header.jsx";
+import MembersList from "../components/dashboard/MembersList";
 import SearchBlock from "../components/search/SearchBlock";
 import SearchResultsBlock from "../components/search/SearchResults.jsx";
 import { useEffect, useState } from "react";
@@ -12,7 +12,7 @@ import { getProjects } from "../api/projects.js";
 import { getTasks } from "../api/tasks.js";
 import { getOrganizationMembers } from "../api/users.js";
 import { searchTasks } from "../api/tasks.js";
-import "../styles/AdminDashboard.module.css"; 
+import "../styles/AdminDashboard.module.css";
 
 export default function AdminDashboard() {
   const nav = useNavigate();
@@ -27,7 +27,7 @@ export default function AdminDashboard() {
   const [searchLoading, setSearchLoading] = useState(false);
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
-  const [searchQuery, setSearchQuery] = useState("");
+
 
   useEffect(() => {
     const role = localStorage.getItem("userRole");
@@ -41,11 +41,11 @@ export default function AdminDashboard() {
 
     setUserName(name || "Admin");
     loadDashboardStats();
-    
+
     // Reset search results when component mounts (page refresh/navigation)
     setShowSearchResults(false);
     setSearchResults([]);
-    setSearchQuery("");
+
   }, [nav]);
 
   const loadDashboardStats = async () => {
@@ -87,10 +87,10 @@ export default function AdminDashboard() {
 
   const handleSearch = async (searchData) => {
     console.log("Search initiated with:", searchData);
-    
+
     setSearchLoading(true);
     setShowSearchResults(true);
-    
+
     try {
       // Remove empty values before sending to API
       const apiFilters = Object.fromEntries(
@@ -100,10 +100,10 @@ export default function AdminDashboard() {
       console.log('📤 Sending API filters:', apiFilters);
       const results = await searchTasks(apiFilters);
       console.log('📥 Received results:', results);
-      
+
       setSearchResults(results);
-      setSearchQuery(searchData.title || "all items");
-      
+
+
       toast.success(`Found ${results.length} results`);
     } catch (error) {
       console.error('Search error:', error);
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
   const handleCloseSearchResults = () => {
     setShowSearchResults(false);
     setSearchResults([]);
-    setSearchQuery("");
+
     toast.success("Search results closed");
   };
 
@@ -139,7 +139,7 @@ export default function AdminDashboard() {
         {showSearchResults ? (
           /* Search Results Block - Only shown when searching */
           <div className="dashboard-block">
-            <SearchResultsBlock 
+            <SearchResultsBlock
               searchResults={searchResults}
               onClose={handleCloseSearchResults}
             />

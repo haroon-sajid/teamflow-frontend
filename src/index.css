@@ -42,7 +42,8 @@ body {
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.05);
   max-width: 440px;
   width: 100%;
-  margin: 0; /* Changed from margin: 1rem; */
+  margin: 0;
+  /* Changed from margin: 1rem; */
   position: relative;
   animation: slideUp 0.4s ease-out;
 }
@@ -52,6 +53,7 @@ body {
     opacity: 0;
     transform: translateY(20px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -121,7 +123,7 @@ body {
   gap: 1.5rem;
 }
 
-.auth-form > div {
+.auth-form>div {
   display: flex;
   flex-direction: column;
 }
@@ -477,7 +479,9 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -864,54 +868,54 @@ html, body, #root {
   .dashboard-layout {
     flex-direction: column;
   }
-  
+
   .page-header {
     padding: 16px 0;
   }
-  
+
   .page-header h1 {
     font-size: 1.5rem;
   }
-  
+
   .action-row {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .add-btn {
     width: 100%;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
     gap: 16px;
   }
-  
+
   .project-list .card-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 12px;
     padding: 16px 20px;
   }
-  
+
   .project-table th,
   .project-table td {
     padding: 12px 16px;
     font-size: 0.875rem;
   }
-  
+
   .button-group {
     flex-direction: column;
     gap: 6px;
   }
-  
+
   .primary-btn,
   .secondary-btn,
   .delete-btn {
     width: 100%;
     text-align: center;
   }
-  
+
   .project-table .action-col {
     width: auto;
   }
@@ -1040,8 +1044,10 @@ html, body, #root {
 }
 
 .sidebar {
-  width: 240px; /* Back to original width */
-  background: #0f172a; /* Original dark blue background */
+  width: 240px;
+  /* Back to original width */
+  background: #0f172a;
+  /* Original dark blue background */
   color: #fff;
   position: fixed;
   top: 0;
@@ -1057,7 +1063,8 @@ html, body, #root {
   font-size: 1.8rem;
   font-weight: bold;
   margin-bottom: 8px;
-  background: none; /* Remove gradient */
+  background: none;
+  /* Remove gradient */
   -webkit-text-fill-color: inherit;
 }
 
@@ -1074,7 +1081,8 @@ html, body, #root {
 .sidebar-btn {
   display: flex;
   align-items: center;
-  background: #1e293b; /* Original button background */
+  background: #1e293b;
+  /* Original button background */
   border: none;
   padding: 12px;
   margin-bottom: 12px;
@@ -1087,12 +1095,16 @@ html, body, #root {
   width: 100%;
 }
 
+
+
 .sidebar-btn:hover {
-  background: #334155; /* Original hover color */
+  background: #334155;
+  /* Original hover color */
 }
 
 .sidebar-btn.active {
-  background: #334155; /* Keep active state same as hover */
+  background: #334155;
+  /* Keep active state same as hover */
 }
 
 /* Icons styling */
@@ -1111,7 +1123,8 @@ html, body, #root {
 .logout-btn {
   display: flex;
   align-items: center;
-  background: #dc2626; /* Professional red */
+  background: #dc2626;
+  /* Professional red */
   padding: 12px;
   border: none;
   border-radius: 6px;
@@ -1123,7 +1136,8 @@ html, body, #root {
 }
 
 .logout-btn:hover {
-  background: #b91c1c; /* Darker red on hover */
+  background: #b91c1c;
+  /* Darker red on hover */
 }
 
 /* Responsive adjustments */
@@ -1131,19 +1145,19 @@ html, body, #root {
   .sidebar {
     width: 70px;
   }
-  
+
   .tagline,
   .sidebar-btn span,
   .logout-btn span {
     display: none;
   }
-  
+
   .sidebar-btn,
   .logout-btn {
     justify-content: center;
     padding: 16px 0;
   }
-  
+
   .sidebar-icon {
     margin-right: 0;
     font-size: 1.4rem;
@@ -1270,12 +1284,12 @@ html, body, #root {
 
 .project-table th.action-col {
   text-align: right;
-  padding-right: 60px; 
+  padding-right: 60px;
 }
 
 .project-table td.action-col {
   text-align: right;
-  padding-right: 20px; 
+  padding-right: 20px;
 }
 
 /* =================== BUTTONS =================== */
@@ -1308,7 +1322,7 @@ html, body, #root {
 
 /* Edit button - Blue color (changed from green to match requested color) */
 .project-edit-btn {
-  background: #3b82f6; 
+  background: #3b82f6;
   color: white;
 
 }
@@ -1321,13 +1335,15 @@ html, body, #root {
 
 /* Hover effects */
 .project-edit-btn:hover:not(:disabled) {
-  background: #2563eb; /* Darker blue */
+  background: #2563eb;
+  /* Darker blue */
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
 }
 
 .project-delete-btn:hover:not(:disabled) {
-  background: #c82333; /* Slightly darker red */
+  background: #c82333;
+  /* Slightly darker red */
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(220, 53, 69, 0.3);
 }
@@ -1348,13 +1364,14 @@ html, body, #root {
     gap: 8px;
     width: 100%;
   }
-  
+
   .project-edit-btn,
   .project-delete-btn {
     width: 100%;
     margin-left: 0;
   }
 }
+
 /* =================== FORM SELECT STYLING =================== */
 
 .modal-select {
@@ -1463,7 +1480,8 @@ html, body, #root {
 
 .kanban-board {
   width: 100%;
-  overflow-x: auto; /* Allow horizontal scrolling if needed */
+  overflow-x: auto;
+  /* Allow horizontal scrolling if needed */
   padding: 20px 0;
 }
 
@@ -1471,13 +1489,15 @@ html, body, #root {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
   gap: 20px;
-  min-width: fit-content; /* Ensure columns don't shrink too much */
+  min-width: fit-content;
+  /* Ensure columns don't shrink too much */
 }
 
 /* For larger screens, ensure equal width columns */
 @media (min-width: 1200px) {
   .kanban-columns {
-    grid-template-columns: repeat(5, 1fr); /* Exactly 5 columns for 5 statuses */
+    grid-template-columns: repeat(5, 1fr);
+    /* Exactly 5 columns for 5 statuses */
   }
 }
 
@@ -1600,22 +1620,50 @@ html, body, #root {
   font-weight: 600;
 }
 
-.task-status.open { background-color: #dbeafe; color: #1d4ed8; }
-.task-status.todo { background-color: #fef3c7; color: #d97706; }
-.task-status.inprogress { background-color: #dbeafe; color: #0ea5e9; }
-.task-status.qa { background-color: #f3e8ff; color: #a855f7; }
-.task-status.done { background-color: #dcfce7; color: #16a34a; }
+.task-status.open {
+  background-color: #dbeafe;
+  color: #1d4ed8;
+}
 
-.priority-high { border-left: 4px solid #ef4444; }
-.priority-medium { border-left: 4px solid #f59e0b; }
-.priority-low { border-left: 4px solid #10b981; }
+.task-status.todo {
+  background-color: #fef3c7;
+  color: #d97706;
+}
+
+.task-status.inprogress {
+  background-color: #dbeafe;
+  color: #0ea5e9;
+}
+
+.task-status.qa {
+  background-color: #f3e8ff;
+  color: #a855f7;
+}
+
+.task-status.done {
+  background-color: #dcfce7;
+  color: #16a34a;
+}
+
+.priority-high {
+  border-left: 4px solid #ef4444;
+}
+
+.priority-medium {
+  border-left: 4px solid #f59e0b;
+}
+
+.priority-low {
+  border-left: 4px solid #10b981;
+}
 
 /* Responsive Design */
 @media (max-width: 768px) {
   .kanban-columns {
-    grid-template-columns: 1fr; /* Stack columns on mobile */
+    grid-template-columns: 1fr;
+    /* Stack columns on mobile */
   }
-  
+
   .task-column {
     min-height: auto;
   }
@@ -1954,17 +2002,17 @@ html, body, #root {
     flex-direction: column;
     gap: 10px;
   }
-  
+
   .task-column {
     min-width: auto;
     width: 100%;
   }
-  
+
   .modal-content {
     width: 90%;
     max-width: 90%;
   }
-  
+
   .form-row {
     flex-direction: column;
     gap: 10px;
@@ -1999,13 +2047,15 @@ html, body, #root {
 }
 
 .invitation-resend-btn {
-  background: #4f46e5; /* Changed to match requested color */
+  background: #4f46e5;
+  /* Changed to match requested color */
   color: white;
   border-color: #4f46e5;
 }
 
 .invitation-resend-btn:hover:not(:disabled) {
-  background: #4338ca; /* Darker shade for hover */
+  background: #4338ca;
+  /* Darker shade for hover */
   border-color: #4338ca;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
@@ -2026,13 +2076,15 @@ html, body, #root {
 
 
 .invitation-send-new-btn {
-  background: #4f46e5; /* Changed to match requested color */
+  background: #4f46e5;
+  /* Changed to match requested color */
   color: white;
   border-color: #4f46e5;
 }
 
 .invitation-send-new-btn:hover:not(:disabled) {
-  background: #4338ca; /* Darker shade for hover */
+  background: #4338ca;
+  /* Darker shade for hover */
   border-color: #4338ca;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(37, 99, 235, 0.3);
@@ -2061,7 +2113,7 @@ html, body, #root {
     gap: 8px;
     width: 100%;
   }
-  
+
   .invitation-action-btn {
     width: 100%;
     margin-left: 0;
@@ -2110,13 +2162,15 @@ html, body, #root {
 
 
 .invitation-manage-btn {
-  background: #10b981; /* Emerald green for "manage" action */
+  background: #10b981;
+  /* Emerald green for "manage" action */
   color: white;
   border-color: #10b981;
 }
 
 .invitation-manage-btn:hover:not(:disabled) {
-  background: #047857; /* Darker green on hover */
+  background: #047857;
+  /* Darker green on hover */
   border-color: #047857;
   transform: translateY(-2px);
   box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
@@ -2444,7 +2498,7 @@ html, body, #root {
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
-  
+
 }
 
 .btn-primary:hover {
@@ -2590,8 +2644,13 @@ html, body, #root {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 /* Responsive Design */
@@ -2601,64 +2660,44 @@ html, body, #root {
     align-items: flex-start;
     gap: 16px;
   }
-  
+
   .header-controls {
     width: 100%;
     justify-content: space-between;
   }
-  
+
   .metrics-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .charts-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .section-header {
     flex-direction: column;
     align-items: flex-start;
     gap: 16px;
   }
-  
+
   .section-actions {
     width: 100%;
     justify-content: flex-start;
   }
-  
+
   .performance-table th,
   .performance-table td {
     padding: 12px 8px;
     font-size: 0.75rem;
   }
-  
+
   .member-info {
     gap: 8px;
   }
-  
+
   .avatar {
     width: 28px;
     height: 28px;
     font-size: 0.75rem;
   }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

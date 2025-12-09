@@ -1,7 +1,7 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import Layout from "../components/Layout";
-import Header from "../components/Header";
+import Layout from "../components/layout/Layout";
+import Header from "../components/layout/Header";
 import "../styles/payment.css";
 
 const PaymentCancel = () => {
@@ -12,7 +12,7 @@ const PaymentCancel = () => {
         title="Payment Cancelled"
         subtitle="Your payment was not completed"
       />
-      
+
       <div className="payment-status-page">
         <div className="payment-status-container">
           <div className="payment-status-card payment-status-card--cancel">
@@ -21,7 +21,7 @@ const PaymentCancel = () => {
             <p className="payment-status-message">
               Your payment was cancelled. No charges have been made to your account.
             </p>
-            
+
             {/* <div className="payment-status-actions">
               <Link to="/plans" className="btn btn--primary">
                 Back to Plans

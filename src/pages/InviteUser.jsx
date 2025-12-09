@@ -1,8 +1,8 @@
 // src/pages/InviteMembers.jsx
 import toast from "react-hot-toast";
 import { useState, useContext, useEffect } from "react";
-import Layout from "../components/Layout";
-import Header from "../components/Header.jsx";
+import Layout from "../components/layout/Layout";
+import Header from "../components/layout/Header.jsx";
 import InviteMemberModal from "../components/modals/InviteMemberModal"; // Use your existing modal
 import ConfirmationModal from "../components/modals/ConfirmationModal";
 import { invitationAPI } from "../api/invitationAPI";
@@ -10,13 +10,13 @@ import { getOrganizationMembers } from "../api/users";
 import { AuthContext } from "../context/AuthContext";
 
 export default function InviteMembers() {
-  const { user } = useContext(AuthContext);
+  useContext(AuthContext);
   const [showModal, setShowModal] = useState(false);
   const [showConfirmation, setShowConfirmation] = useState(false);
   const [confirmationConfig, setConfirmationConfig] = useState({
     title: "",
     message: "",
-    onConfirm: () => {}
+    onConfirm: () => { }
   });
   const [invitations, setInvitations] = useState([]);
   const [currentMembers, setCurrentMembers] = useState([]);
@@ -35,7 +35,7 @@ export default function InviteMembers() {
         invitationAPI.getMyInvitations(),
         getOrganizationMembers()
       ]);
-      
+
       setInvitations(invitationsData);
       setCurrentMembers(membersData);
     } catch (err) {
@@ -48,7 +48,7 @@ export default function InviteMembers() {
 
   const getFilteredInvitations = () => {
     const currentMemberEmails = new Set(currentMembers.map(member => member.email));
-    
+
     return invitations.filter(invitation => {
       if (invitation.status === 'accepted' && !currentMemberEmails.has(invitation.email)) {
         return false;
@@ -64,9 +64,9 @@ export default function InviteMembers() {
   };
 
   const handleResendInvitation = async (invitation) => {
-    const isDeletedMember = invitation.status === 'accepted' && 
-                           !currentMembers.some(member => member.email === invitation.email);
-    
+    const isDeletedMember = invitation.status === 'accepted' &&
+      !currentMembers.some(member => member.email === invitation.email);
+
     if (isDeletedMember) {
       setConfirmationConfig({
         title: "Send New Invitation",
@@ -100,7 +100,7 @@ export default function InviteMembers() {
             loadAllData();
           } catch (error) {
             console.error("Failed to resend invitation:", error);
-            
+
             if (error.message.includes('No pending invitation found')) {
               toast.error(`No active invitation found for ${invitation.email}. Creating new invitation...`);
               try {
@@ -296,7 +296,7 @@ export default function InviteMembers() {
         </section>
       </div>
 
-            <style>{`
+      <style>{`
         .invitation-stats {
           display: flex;
           gap: 1rem;

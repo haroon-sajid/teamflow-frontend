@@ -1,7 +1,7 @@
 // src/pages/AnalyticsDashboard.jsx
 import React, { useState, useEffect } from 'react';
-import Layout from '../components/Layout';
-import Header from '../components/Header.jsx';
+import Layout from '../components/layout/Layout';
+import Header from '../components/layout/Header.jsx';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, LineChart, Line } from 'recharts';
 import { getProjects } from "../api/projects.js";
 import { getTasks } from "../api/tasks.js";
@@ -52,9 +52,9 @@ export default function AnalyticsDashboard() {
   // ✅ IMPROVED: Better task status detection
   const normalizeStatus = (status) => {
     if (!status) return 'unknown';
-    
+
     const statusLower = status.toLowerCase().trim();
-    
+
     if (statusLower.includes('open') || statusLower.includes('to do') || statusLower === 'to_do') {
       return 'open';
     }
@@ -67,7 +67,7 @@ export default function AnalyticsDashboard() {
     if (statusLower.includes('done') || statusLower.includes('complete')) {
       return 'done';
     }
-    
+
     return statusLower;
   };
 
@@ -77,9 +77,9 @@ export default function AnalyticsDashboard() {
     openTasks: tasks.filter(t => normalizeStatus(t.status) === 'open').length,
     inProgressTasks: tasks.filter(t => normalizeStatus(t.status) === 'in_progress').length,
     completedTasks: tasks.filter(t => normalizeStatus(t.status) === 'done').length,
-    overdueTasks: tasks.filter(t => 
-      t.due_date && 
-      new Date(t.due_date) < new Date() && 
+    overdueTasks: tasks.filter(t =>
+      t.due_date &&
+      new Date(t.due_date) < new Date() &&
       normalizeStatus(t.status) !== 'done'
     ).length
   };
@@ -110,22 +110,22 @@ export default function AnalyticsDashboard() {
       // Check member_names array (if available from backend)
       if (task.member_names && Array.isArray(task.member_names)) {
         const userFullName = user.full_name || user.email.split('@')[0];
-        return task.member_names.some(name => 
+        return task.member_names.some(name =>
           name.toLowerCase().includes(userFullName.toLowerCase())
         );
       }
       // Fallback to member_id single value
       return task.member_id === user.id;
     });
-    
+
     console.log(`📋 User ${user.full_name} tasks:`, userTasks);
 
     const completedTasks = userTasks.filter(t => normalizeStatus(t.status) === 'done').length;
     const inProgressTasks = userTasks.filter(t => normalizeStatus(t.status) === 'in_progress').length;
     const totalTasks = userTasks.length;
-    
+
     const progressPercentage = totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0;
-    
+
     return {
       name: user.full_name || user.email.split('@')[0],
       id: user.id,
@@ -133,9 +133,9 @@ export default function AnalyticsDashboard() {
       completedTasks,
       inProgressTasks,
       progress: progressPercentage,
-      overdueTasks: userTasks.filter(task => 
-        task.due_date && 
-        new Date(task.due_date) < new Date() && 
+      overdueTasks: userTasks.filter(task =>
+        task.due_date &&
+        new Date(task.due_date) < new Date() &&
         normalizeStatus(task.status) !== 'done'
       ).length
     };
@@ -163,7 +163,7 @@ export default function AnalyticsDashboard() {
           title="Project Analytics"
           subtitle="Comprehensive overview of projects, tasks, and team performance"
         />
-        
+
         <div className="loading-container">
           <div className="spinner"></div>
           <p>Loading analytics data...</p>
@@ -182,7 +182,7 @@ export default function AnalyticsDashboard() {
       <div className="analytics-dashboard">
         {/* Dashboard Header Controls */}
         <div className="header-controls">
-          <select 
+          <select
             className="time-filter"
             value={timeRange}
             onChange={(e) => setTimeRange(e.target.value)}
@@ -204,25 +204,25 @@ export default function AnalyticsDashboard() {
 
         {/* Tab Navigation */}
         <div className="tabs">
-          <button 
+          <button
             className={`tab ${activeTab === 'overview' ? 'active' : ''}`}
             onClick={() => setActiveTab('overview')}
           >
             Overview
           </button>
-          <button 
+          <button
             className={`tab ${activeTab === 'projects' ? 'active' : ''}`}
             onClick={() => setActiveTab('projects')}
           >
             Projects
           </button>
-          <button 
+          <button
             className={`tab ${activeTab === 'tasks' ? 'active' : ''}`}
             onClick={() => setActiveTab('tasks')}
           >
             Tasks
           </button>
-          <button 
+          <button
             className={`tab ${activeTab === 'team' ? 'active' : ''}`}
             onClick={() => setActiveTab('team')}
           >
@@ -391,7 +391,7 @@ export default function AnalyticsDashboard() {
                 </button>
               </div>
             </div>
-            
+
             <div className="performance-table-container">
               <table className="performance-table">
                 <thead>
@@ -421,8 +421,8 @@ export default function AnalyticsDashboard() {
                       <td>{member.inProgressTasks}</td>
                       <td>
                         <div className="progress-bar">
-                          <div 
-                            className="progress-fill" 
+                          <div
+                            className="progress-fill"
                             style={{ width: `${member.progress}%` }}
                           ></div>
                           <span className="progress-text">{member.progress}%</span>
@@ -436,8 +436,8 @@ export default function AnalyticsDashboard() {
                       <td>
                         <div className="productivity-score">
                           <div className="score-bar">
-                            <div 
-                              className="score-fill" 
+                            <div
+                              className="score-fill"
                               style={{ width: `${Math.min(100, member.progress + (member.completedTasks * 2))}%` }}
                             ></div>
                           </div>
@@ -467,7 +467,7 @@ export default function AnalyticsDashboard() {
                 </button>
               </div>
             </div>
-            
+
             <div className="chart-container">
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={projectTimelineData}>
@@ -476,11 +476,11 @@ export default function AnalyticsDashboard() {
                   <YAxis />
                   <Tooltip />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="projects" 
-                    stroke="#4f46e5" 
-                    activeDot={{ r: 8 }} 
+                  <Line
+                    type="monotone"
+                    dataKey="projects"
+                    stroke="#4f46e5"
+                    activeDot={{ r: 8 }}
                     strokeWidth={2}
                     name="Active Projects"
                   />

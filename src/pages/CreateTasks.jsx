@@ -1,8 +1,8 @@
-import Layout from "../components/Layout";
-import Header from "../components/Header.jsx";
-import Kanban from "../components/Kanban";
+import Layout from "../components/layout/Layout";
+import Header from "../components/layout/Header.jsx";
+import Kanban from "../components/tasks/Kanban";
 import { useRef } from "react";
-import "../styles/CreateTasks.module.css"; 
+import "../styles/CreateTasks.module.css";
 
 
 export default function CreateTaskPage() {
@@ -22,7 +22,7 @@ export default function CreateTaskPage() {
         actionButtonText="+ Create Task"
         onActionClick={() => openCreateTaskModal()}
       />
-    
+
       <Kanban ref={kanbanRef} openTaskModal={openCreateTaskModal} />
     </Layout>
   );

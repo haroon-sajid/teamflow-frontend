@@ -1,13 +1,12 @@
 
 // Update in TimeSheet.jsx
-import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout';
-import Header from '../components/Header';
+import { useState, useEffect } from 'react';
+import Layout from '../components/layout/Layout';
+import Header from '../components/layout/Header';
 import styles from '../styles/TimeSheet.module.css';
-import { 
-  getEmployeesTimesheet, 
-  getCurrentWeekStart, 
+import {
+  getEmployeesTimesheet,
+  getCurrentWeekStart,
   getNextWeekStart,
   getPreviousWeekStart,
   formatDateForDisplay,
@@ -20,7 +19,7 @@ import TaskModal from "../components/modals/TaskModal";
 import TimeLogDetailsModal from "../components/modals/TimeLogDetailsModal.jsx";
 
 const TimeSheet = () => {
-  const navigate = useNavigate();
+
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
   const [employees, setEmployees] = useState([]);
@@ -63,6 +62,7 @@ const TimeSheet = () => {
     fetchTimesheetData();
     fetchOrganizationMembers();
     fetchProjects();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // ✅ NEW: Function to open time log details modal
@@ -107,12 +107,12 @@ const TimeSheet = () => {
     if (!taskData) return null;
 
     const memberIds = taskData.member_ids || (taskData.member_id ? [taskData.member_id] : []);
-    const members = memberIds.map(memberId => 
+    const members = memberIds.map(memberId =>
       employees.find(u => u.id === memberId)
     ).filter(Boolean);
-    
+
     const project = projects.find((p) => p.id === taskData.project_id);
-    
+
     const statusKey = taskData.status?.toLowerCase().replace(/[-\s]/g, "");
     const displayStatus = statusMap[statusKey] || "Open";
 
@@ -131,7 +131,7 @@ const TimeSheet = () => {
       try {
         const tasks = await getTasks();
         const taskData = tasks.find(t => t.id === taskId);
-        
+
         if (taskData) {
           const normalizedTask = normalizeTaskData(taskData);
           setSelectedTask(normalizedTask);
@@ -159,7 +159,7 @@ const TimeSheet = () => {
   const saveTask = async (payload) => {
     try {
       setModalLoading(true);
-      
+
       const reverseStatusMap = {
         "Open": "open",
         "To Do": "todo",
@@ -169,9 +169,9 @@ const TimeSheet = () => {
       };
 
       const backendStatus = reverseStatusMap[payload.status] || payload.status.toLowerCase().replace(/ /g, "-");
-      const taskPayload = { 
-        ...payload, 
-        status: backendStatus 
+      const taskPayload = {
+        ...payload,
+        status: backendStatus
       };
 
       Object.keys(taskPayload).forEach(
@@ -185,7 +185,7 @@ const TimeSheet = () => {
         await createTask(taskPayload);
         console.log('Task created successfully');
       }
-      
+
       closeTaskModal();
       fetchTimesheetData();
     } catch (error) {
@@ -207,7 +207,7 @@ const TimeSheet = () => {
     setLoading(true);
     try {
       let apiFilters = {};
-      
+
       switch (filters.week_type) {
         case 'prev-week':
           apiFilters.week_start = getPreviousWeekStart(filters.week_start);
@@ -238,25 +238,25 @@ const TimeSheet = () => {
       });
 
       let timesheetData;
-      
+
       if (filters.employee_id) {
         const [taskData, worklogsData] = await Promise.all([
           getFilteredUserTasks(apiFilters),
           getWorklogsSummary(apiFilters)
         ]);
-        
+
         const formattedData = formatEmployeeTaskData(taskData, worklogsData, filters.employee_id);
         timesheetData = formattedData;
       } else {
         const summaryResponse = await getEmployeesTimesheet(apiFilters);
         timesheetData = summaryResponse.data || summaryResponse || [];
-        
+
         if (timesheetData.length > 0) {
           const enhancedData = await enhanceDataWithWorklogsSummary(timesheetData, apiFilters.week_start || apiFilters.start_date);
           timesheetData = enhancedData;
         }
       }
-      
+
       setData(timesheetData);
     } catch (error) {
       console.error('Error fetching timesheet data:', error);
@@ -270,7 +270,7 @@ const TimeSheet = () => {
     try {
       const enhancedData = [];
       const currentDate = new Date().toISOString().split('T')[0];
-      
+
       for (const employee of timesheetData) {
         try {
           const worklogsData = await getWorklogsSummary({
@@ -282,21 +282,21 @@ const TimeSheet = () => {
             week_start: weekStart,
             user_id: employee.user_id || employee.id
           });
-          
+
           const weekDates = getWeekDates();
           const dailyDataWithTasks = [];
-          
+
           weekDates.forEach((weekDate, index) => {
             const dateStr = weekDate.isoDate;
             const isFutureDate = dateStr > currentDate;
-            
+
             const dayTasks = !isFutureDate ? (taskData.daily_tasks?.[dateStr] || []) : [];
-            
+
             const existingDayData = (employee.daily_data || employee.week_data || [])[index] || {};
-            
+
             const dailyTaskHours = dayTasks.reduce((sum, task) => sum + (task.logged_hours || 0), 0);
             const dailyWorkHours = existingDayData.work_hours || existingDayData.hours || dailyTaskHours;
-            
+
             dailyDataWithTasks.push({
               day: weekDate.day,
               date: weekDate.date,
@@ -308,7 +308,7 @@ const TimeSheet = () => {
               isToday: dateStr === currentDate
             });
           });
-          
+
           enhancedData.push({
             ...employee,
             daily_data: dailyDataWithTasks,
@@ -321,7 +321,7 @@ const TimeSheet = () => {
           enhancedData.push(employee);
         }
       }
-      
+
       return enhancedData;
     } catch (error) {
       console.error('Error enhancing data with worklogs summary:', error);
@@ -331,23 +331,23 @@ const TimeSheet = () => {
 
   const formatEmployeeTaskData = (taskData, worklogsData, employeeId) => {
     if (!taskData || !taskData.daily_tasks) return [];
-    
+
     const employee = employees.find(emp => emp.id === parseInt(employeeId));
     if (!employee) return [];
-    
+
     const weekDates = getWeekDates();
     const currentDate = new Date().toISOString().split('T')[0];
     const formattedData = [];
-    
+
     weekDates.forEach((weekDate, index) => {
       const dateStr = weekDate.isoDate;
       const isFutureDate = dateStr > currentDate;
-      
+
       const dayTasks = !isFutureDate ? (taskData.daily_tasks[dateStr] || []) : [];
-      
+
       const dailyTaskHours = dayTasks.reduce((sum, task) => sum + (task.logged_hours || 0), 0);
       const dailyWorkHours = dailyTaskHours;
-      
+
       formattedData.push({
         day: weekDate.day,
         date: weekDate.date,
@@ -359,7 +359,7 @@ const TimeSheet = () => {
         isToday: dateStr === currentDate
       });
     });
-    
+
     return [{
       id: employeeId,
       user_id: employeeId,
@@ -389,7 +389,7 @@ const TimeSheet = () => {
 
   const getWeekDates = () => {
     let startDate;
-    
+
     switch (filters.week_type) {
       case 'prev-week':
         startDate = getPreviousWeekStart(filters.week_start);
@@ -405,17 +405,17 @@ const TimeSheet = () => {
     }
 
     const dates = [];
-    const daysCount = filters.week_type === 'custom-range' && filters.custom_end ? 
+    const daysCount = filters.week_type === 'custom-range' && filters.custom_end ?
       Math.ceil((new Date(filters.custom_end) - new Date(startDate)) / (1000 * 60 * 60 * 24)) + 1 : 7;
-    
+
     for (let i = 0; i < daysCount; i++) {
       const date = new Date(startDate);
       date.setDate(date.getDate() + i);
-      
+
       if (filters.week_type === 'custom-range' && filters.custom_end && date > new Date(filters.custom_end)) {
         break;
       }
-      
+
       const isoDate = date.toISOString().split('T')[0];
       dates.push({
         day: ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()],
@@ -435,7 +435,7 @@ const TimeSheet = () => {
         </div>
       );
     }
-    
+
     if (!tasks || tasks.length === 0) {
       return null;
     }
@@ -443,11 +443,11 @@ const TimeSheet = () => {
     return (
       <div className={styles.tasksList}>
         {tasks.slice(0, 3).map((task, taskIndex) => (
-          <div 
-            key={taskIndex} 
+          <div
+            key={taskIndex}
             className={`${styles.taskItem} ${styles[getPriorityClass(task.priority)]}`}
             onClick={() => openCreateTaskModal(task.task_id || task.id)}
-            style={{cursor: 'pointer'}}
+            style={{ cursor: 'pointer' }}
             title="Click to view/edit task"
           >
             <span className={styles.taskTitle}>
@@ -486,7 +486,7 @@ const TimeSheet = () => {
 
   return (
     <Layout>
-      <Header 
+      <Header
         title="Time Sheet"
         subtitle="Manage and view employee timesheets"
       />
@@ -496,7 +496,7 @@ const TimeSheet = () => {
         <div className={styles.filterBar}>
           <div className={`${styles.filterGroup} ${filters.week_type === 'custom-range' ? styles.shrinkField : ''}`}>
             <label className={styles.filterLabel}>Employees</label>
-            <select 
+            <select
               className={styles.dropdown}
               value={filters.employee_id}
               onChange={(e) => handleFilterChange('employee_id', e.target.value)}
@@ -513,7 +513,7 @@ const TimeSheet = () => {
           <div className={`${styles.filterGroup} ${styles.weekSelectionGroup} ${filters.week_type === 'custom-range' ? styles.expandField : ''}`}>
             <label className={styles.filterLabel}>Select Week</label>
             <div className={styles.weekSelectionContainer}>
-              <select 
+              <select
                 className={`${styles.dropdown} ${styles.weekTypeDropdown}`}
                 value={filters.week_type}
                 onChange={(e) => handleFilterChange('week_type', e.target.value)}
@@ -523,7 +523,7 @@ const TimeSheet = () => {
                 <option value="next-week">Next Week</option>
                 <option value="custom-range">Custom Range</option>
               </select>
-              
+
               {filters.week_type === 'custom-range' && (
                 <div className={styles.customRangeContainer}>
                   <input
@@ -547,8 +547,8 @@ const TimeSheet = () => {
           </div>
 
           <div className={styles.searchButtonContainer}>
-            <button 
-              className={styles.searchButton} 
+            <button
+              className={styles.searchButton}
               onClick={handleSearch}
               disabled={loading}
             >
@@ -622,7 +622,7 @@ const TimeSheet = () => {
                       <span className={styles.statTwh}>
                         TWH: {employee.total_work_hours?.toFixed(1) || "0.0"}
                       </span>
-                      <span 
+                      <span
                         className={`${styles.statTtt} ${styles.clickableTtt}`}
                         onClick={() => openTimeLogDetails(employee)}
                         title="Click to view detailed time logs"
@@ -679,7 +679,7 @@ const TimeSheet = () => {
             <div className={styles.emptyStateIcon}>📊</div>
             <h3>No Timesheet Data</h3>
             <p>No timesheet records found for the selected filters.</p>
-            <button 
+            <button
               className={styles.retryButton}
               onClick={fetchTimesheetData}
             >

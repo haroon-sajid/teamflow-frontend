@@ -1,8 +1,8 @@
 
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Layout from "../components/Layout";
-import Header from "../components/Header";
+import Layout from "../components/layout/Layout";
+import Header from "../components/layout/Header";
 import PricingSection from "../components/payment/PricingSection";
 import "../styles/plans.css";
 
@@ -15,13 +15,13 @@ const PlansPage = () => {
     const checkAuthorization = () => {
       try {
         const userRole = localStorage.getItem("userRole") || "";
-        
+
         // Check if user is super admin (organization creator)
         // Adjust these conditions based on your actual role system
-        const isSuperAdmin = userRole === "admin" || 
-                            userRole === "super_admin" || 
-                            userRole === "organization_admin" ||
-                            userRole === "owner";
+        const isSuperAdmin = userRole === "admin" ||
+          userRole === "super_admin" ||
+          userRole === "organization_admin" ||
+          userRole === "owner";
 
         if (!isSuperAdmin) {
           // Redirect unauthorized users
@@ -68,8 +68,8 @@ const PlansPage = () => {
           <div className="pricing-container">
             <div className="error-message">
               <p>Only organization administrators can upgrade plans.</p>
-              <button 
-                onClick={() => navigate("/admin")} 
+              <button
+                onClick={() => navigate("/admin")}
                 className="btn btn--primary"
                 style={{ marginTop: '1rem' }}
               >
@@ -88,7 +88,7 @@ const PlansPage = () => {
         title="Choose Your Plan"
         subtitle="Simple pricing. No surprises. Upgrade anytime."
       />
-      
+
       <div className="plans-page">
         <PricingSection />
       </div>

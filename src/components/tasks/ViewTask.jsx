@@ -9,19 +9,19 @@
  * @param {Function} toast - Optional: show error if loading
  */
 export const openViewTaskModal = (
-  task,
-  setSelectedTask,
-  setModalMode,
-  setShowTaskModal,
-  loadingDependencies = false,
-  toast = null
+    task,
+    setSelectedTask,
+    setModalMode,
+    setShowTaskModal,
+    loadingDependencies = false,
+    toast = null
 ) => {
-  if (loadingDependencies) {
-    if (toast) toast.error("Please wait while data loads...");
-    return;
-  }
+    if (loadingDependencies) {
+        if (toast) toast.error("Please wait while data loads...");
+        return;
+    }
 
-  setSelectedTask(task);
-  setModalMode('view');
-  setShowTaskModal(true);
+    setSelectedTask(task);
+    setModalMode('view');
+    setShowTaskModal(true);
 };

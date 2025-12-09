@@ -2,8 +2,8 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
-import Layout from "../Layout";
-import Header from "../Header"; // Import the Header component
+import Layout from "../layout/Layout";
+import Header from "../layout/Header"; // Import the Header component
 import { getMyProfile, updateMyProfile } from "../../api/profile";
 import "../../styles/profile.css";
 
@@ -51,7 +51,7 @@ export default function ProfilePage() {
       });
     } catch (error) {
       console.error("Failed to load profile:", error);
-      
+
       if (error.message.includes("token") || error.message.includes("auth") || error.message.includes("401")) {
         toast.error("Session expired. Please log in again.");
         localStorage.removeItem("token");
@@ -60,7 +60,7 @@ export default function ProfilePage() {
         navigate("/login");
         return;
       }
-      
+
       toast.error("Failed to load profile data");
     } finally {
       setLoading(false);
@@ -108,7 +108,7 @@ export default function ProfilePage() {
 
       // 🔹 Update profile and use the returned data directly
       const updatedUser = await updateMyProfile(formData);
-      
+
       // 🔹 Update both user and formData states immediately
       setUser(updatedUser);
       setFormData({
@@ -169,10 +169,10 @@ export default function ProfilePage() {
 
       // ✅ FIX: Send empty form data or only the image file for image-only updates
       const updatedUser = await updateMyProfile({}, file);
-      
+
       // ✅ FIX: Update user state immediately with new image AND all other fields
       setUser(updatedUser);
-      
+
       // ✅ FIX: Also update formData to ensure all fields stay in sync
       setFormData(prev => ({
         ...prev,
@@ -250,8 +250,8 @@ export default function ProfilePage() {
           <div className="profile-card">
             <div className="profile-page-error">
               <p>Failed to load profile data</p>
-              <button 
-                onClick={() => navigate("/login")} 
+              <button
+                onClick={() => navigate("/login")}
                 className="btn btn-primary"
                 style={{ marginTop: '1rem' }}
               >
@@ -278,15 +278,15 @@ export default function ProfilePage() {
             {/* Profile Image Section */}
             <div className="profile-image-section">
               <div className="profile-image-container">
-                <div 
+                <div
                   className="profile-image-upload"
                   onClick={handleImageClick}
                   style={{ cursor: 'pointer' }}
                 >
                   {user.profilePicture ? (
-                    <img 
-                      src={user.profilePicture} 
-                      alt="Profile" 
+                    <img
+                      src={user.profilePicture}
+                      alt="Profile"
                       className="profile-image"
                     />
                   ) : (
@@ -331,7 +331,7 @@ export default function ProfilePage() {
                       placeholder="Enter your full name"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="email">Email Address</label>
                     <input
@@ -359,7 +359,7 @@ export default function ProfilePage() {
                       placeholder="Enter your phone number"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="jobTitle">Job Title</label>
                     <input
@@ -385,7 +385,7 @@ export default function ProfilePage() {
                       placeholder="Enter your department"
                     />
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="timeZone">Time Zone</label>
                     <select
@@ -453,7 +453,7 @@ export default function ProfilePage() {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="form-group">
                     <label htmlFor="status">Account Status</label>
                     <input
@@ -482,8 +482,8 @@ export default function ProfilePage() {
                 </div>
 
                 <div className="form-actions">
-                  <button 
-                    type="submit" 
+                  <button
+                    type="submit"
                     className="btn btn-primary"
                     disabled={saving}
                   >
