@@ -1,4 +1,4 @@
-// src/api/taskExtras.js - FIXED endpoints
+// src/api/taskExtras.js 
 import { API_URL } from "../config/apiConfig";
 
 function authHeaders() {
@@ -22,7 +22,11 @@ export async function fetchTaskComments(taskId) {
 
     if (!res.ok) {
       if (res.status === 401) {
+        const theme = localStorage.getItem('sidebarTheme');
+        const collapsed = localStorage.getItem('sidebarCollapsed');
         localStorage.clear();
+        if (theme) localStorage.setItem('sidebarTheme', theme);
+        if (collapsed) localStorage.setItem('sidebarCollapsed', collapsed);
         window.location.href = "/login";
       }
       const result = await res.json();
@@ -46,7 +50,11 @@ export async function postTaskComment(taskId, message) {
 
     if (!res.ok) {
       if (res.status === 401) {
+        const theme = localStorage.getItem('sidebarTheme');
+        const collapsed = localStorage.getItem('sidebarCollapsed');
         localStorage.clear();
+        if (theme) localStorage.setItem('sidebarTheme', theme);
+        if (collapsed) localStorage.setItem('sidebarCollapsed', collapsed);
         window.location.href = "/login";
       }
       const result = await res.json();
@@ -69,7 +77,11 @@ export async function fetchTaskWorkLogs(taskId) {
 
     if (!res.ok) {
       if (res.status === 401) {
+        const theme = localStorage.getItem('sidebarTheme');
+        const collapsed = localStorage.getItem('sidebarCollapsed');
         localStorage.clear();
+        if (theme) localStorage.setItem('sidebarTheme', theme);
+        if (collapsed) localStorage.setItem('sidebarCollapsed', collapsed);
         window.location.href = "/login";
       }
       const result = await res.json();
@@ -110,7 +122,7 @@ export async function postTaskWorkLog(taskId, logData) {
 
     if (!res.ok) {
       console.error("❌ Worklog API Error Details:", result);
-      
+
       let errorMessage = 'Failed to log work';
       if (result && typeof result === 'object') {
         if (Array.isArray(result.detail)) {
@@ -126,10 +138,14 @@ export async function postTaskWorkLog(taskId, logData) {
       }
 
       if (res.status === 401) {
+        const theme = localStorage.getItem('sidebarTheme');
+        const collapsed = localStorage.getItem('sidebarCollapsed');
         localStorage.clear();
+        if (theme) localStorage.setItem('sidebarTheme', theme);
+        if (collapsed) localStorage.setItem('sidebarCollapsed', collapsed);
         window.location.href = "/login";
       }
-      
+
       return { ok: false, error: errorMessage };
     }
 
@@ -151,7 +167,11 @@ export async function deleteTaskWorkLog(worklogId) {
 
     if (!res.ok) {
       if (res.status === 401) {
+        const theme = localStorage.getItem('sidebarTheme');
+        const collapsed = localStorage.getItem('sidebarCollapsed');
         localStorage.clear();
+        if (theme) localStorage.setItem('sidebarTheme', theme);
+        if (collapsed) localStorage.setItem('sidebarCollapsed', collapsed);
         window.location.href = "/login";
       }
       const result = await res.json();

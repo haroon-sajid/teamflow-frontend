@@ -57,7 +57,7 @@
 
 /* Container */
 .container {
-  padding: 16px;
+  /* padding: 10px; */
   max-width: 1400px;
   margin: 0 auto;
   min-height: calc(100vh - 200px);
@@ -219,7 +219,8 @@
   justify-content: space-between;
   min-height: 100px;
   transition: all 0.2s ease;
-  margin-bottom: 0; /* Remove any bottom margin */
+  margin-bottom: 0;
+  /* Remove any bottom margin */
 }
 
 /* Day Metrics - positioned completely outside the box */
@@ -229,7 +230,8 @@
   align-items: center;
   padding: 0 4px;
   gap: 8px;
-  margin-top: 0; /* No top margin since it's outside */
+  margin-top: 0;
+  /* No top margin since it's outside */
 }
 
 .workHours {
@@ -271,12 +273,12 @@
     flex-direction: column;
     gap: 2px;
   }
-  
+
   .workHours,
   .taskTime {
     font-size: 11px;
   }
-  
+
   .dayCellContainer {
     gap: 6px;
   }
@@ -318,8 +320,13 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .emptyState {
@@ -647,50 +654,50 @@
 /* Enhanced responsive design */
 @media (max-width: 1024px) {
   .container {
-    padding: 12px;
+    padding: 10px;
   }
-  
+
   .weekSelectionContainer {
     flex-direction: column;
     align-items: stretch;
     gap: 8px;
   }
-  
+
   .customRangeContainer {
     width: 100%;
   }
-  
+
   .weekTypeDropdown {
     min-width: 100%;
   }
-  
+
   .filterBar {
     flex-direction: column;
     align-items: stretch;
   }
-  
+
   .filterGroup {
     min-width: 100%;
   }
-  
+
   .employeeCard {
     flex-direction: column;
     gap: 16px;
   }
-  
+
   .employeeInfo {
     width: 100%;
   }
-  
+
   .daysGrid {
     grid-template-columns: repeat(4, 1fr);
   }
-  
+
   .shrinkField {
     flex: 1;
     min-width: 100%;
   }
-  
+
   .expandField {
     flex: 1;
     min-width: 100%;
@@ -701,39 +708,39 @@
   .container {
     padding: 8px;
   }
-  
+
   .customRangeContainer {
     flex-direction: column;
     gap: 8px;
   }
-  
+
   .dateSeparator {
     display: none;
   }
-  
+
   .weekHeader {
     flex-direction: column;
     gap: 12px;
   }
-  
+
   .employeeInfoHeader {
     width: 100%;
   }
-  
+
   .daysGrid {
     grid-template-columns: repeat(2, 1fr);
   }
-  
+
   .employeeStats {
     flex-direction: column;
     gap: 6px;
   }
-  
+
   .employeeInfo {
     flex-direction: column;
     text-align: center;
   }
-  
+
   .employeeAvatar {
     align-self: center;
   }
@@ -743,32 +750,32 @@
   .container {
     padding: 8px;
   }
-  
+
   .filterBar {
     padding: 12px;
   }
-  
+
   .employeeCard {
     padding: 12px;
   }
-  
+
   .dayCell {
     padding: 8px 4px;
     min-height: 90px;
   }
-  
+
   .workHours {
     font-size: 10px;
   }
-  
+
   .taskTime {
     font-size: 11px;
   }
-  
+
   .employeeStats {
     flex-direction: column;
   }
-  
+
   .stat {
     text-align: center;
   }
@@ -781,15 +788,11 @@
   color: #007bff;
   font-weight: 500;
   transition: color 0.2s ease;
-  user-select: none; /* prevents text selection on click */
+  user-select: none;
+  /* prevents text selection on click */
 }
 
 .clickableTtt:hover {
   color: #0056b3;
   text-decoration: underline;
 }
-
-
-
-
-

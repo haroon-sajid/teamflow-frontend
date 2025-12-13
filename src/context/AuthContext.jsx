@@ -34,11 +34,11 @@ export const AuthProvider = ({ children }) => {
         if (userData.role) {
           localStorage.setItem("userRole", userData.role);
         }
-        
+
         if (userData.full_name) {
           localStorage.setItem("userName", userData.full_name);
         }
-        
+
         if (userData.email) {
           localStorage.setItem("userEmail", userData.email);
         }
@@ -66,7 +66,16 @@ export const AuthProvider = ({ children }) => {
         (error?.status === 401) ||
         (error?.status === 403 && error.message?.includes("Invalid token"))
       ) {
+        // Preserve sidebar settings
+        const theme = localStorage.getItem('sidebarTheme');
+        const collapsed = localStorage.getItem('sidebarCollapsed');
+
         localStorage.clear();
+
+        // Restore sidebar settings
+        if (theme) localStorage.setItem('sidebarTheme', theme);
+        if (collapsed) localStorage.setItem('sidebarCollapsed', collapsed);
+
         setUser(null);
         toast.error("Session expired, please log in again.");
       }
@@ -94,21 +103,21 @@ export const AuthProvider = ({ children }) => {
 
     if (access_token) localStorage.setItem("token", access_token);
     localStorage.setItem("user", JSON.stringify(userObj));
-    
+
     // ✅ ENHANCED: Ensure all user data is properly stored
     localStorage.setItem(
       "userName",
       userObj.full_name ?? userObj.name ?? userObj.email?.split("@")[0] ?? "User"
     );
-    
+
     if (userObj.role) {
       localStorage.setItem("userRole", userObj.role);
     }
-    
+
     if (userObj.email) {
       localStorage.setItem("userEmail", userObj.email);
     }
-    
+
     if (userObj.organization_id) {
       localStorage.setItem("organizationId", userObj.organization_id);
     }

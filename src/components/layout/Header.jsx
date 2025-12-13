@@ -1,7 +1,7 @@
 import React from "react";
 import styles from "../../styles/Header.module.css"; // Import as module
 
-export default function Header({ title, subtitle, actionButtonText, onActionClick, showSuperAdminBadge = false }) {
+export default function Header({ title, subtitle, actionButtonText, onActionClick, showSuperAdminBadge = false, actionButtonVariant = 'primary' }) {
     return (
         <div className={styles.headerContainer}>
             <div className={styles.headerContent}>
@@ -22,7 +22,10 @@ export default function Header({ title, subtitle, actionButtonText, onActionClic
                 {/* Right side: Optional Action Button */}
                 {actionButtonText && onActionClick && (
                     <div className={styles.headerRight}>
-                        <button className={`${styles.primaryBtn} ${styles.addBtn}`} onClick={onActionClick}>
+                        <button
+                            className={`${actionButtonVariant === 'success' ? styles.successBtn : styles.primaryBtn} ${styles.addBtn}`}
+                            onClick={onActionClick}
+                        >
                             {actionButtonText}
                         </button>
                     </div>

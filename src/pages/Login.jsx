@@ -4,6 +4,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { toast } from "react-hot-toast";
 import { loginUser } from "../api/auth";
 import { AuthContext } from "../context/AuthContext";
+import styles from "../styles/Auth.module.css";
+
+import { Mail, Lock, Eye, EyeOff, ArrowRight, Zap, Shield, Users, Clock, Sparkles, BarChart, CheckCircle, Target } from 'lucide-react';
 
 export default function Login() {
   const nav = useNavigate();
@@ -33,14 +36,13 @@ export default function Login() {
       localStorage.setItem("user", JSON.stringify(user));
       localStorage.setItem("userName", user.full_name || user.email.split('@')[0]);
       localStorage.setItem("userRole", user.role);
-      
+
       toast.success("Welcome back! 👋");
 
-      // ✅ FIXED: Redirect members to /dashboard instead of /member
       if (user.role === "admin" || user.role === "super_admin") {
         nav("/admin");
       } else {
-        nav("/member"); // Changed from /member to /dashboard
+        nav("/member");
       }
     } catch (err) {
       console.error("Login error:", err);
@@ -51,79 +53,193 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-card">
-      {/* Brand Logo */}
-      <div className="auth-brand">
-        <div className="auth-logo">
-          <span className="auth-logo-text">TF</span>
+    <div className={styles.authContainer}>
+      {/* Animated Background Elements */}
+      <div className={styles.backgroundOrb1} />
+      <div className={styles.backgroundOrb2} />
+      <div className={styles.backgroundGrid} />
+
+      {/* Left Side - Hero Section */}
+      <div className={styles.leftPanel}>
+        <div className={styles.brandSection}>
+          <Link to="/" className={styles.brandLogo}>
+            <div className={styles.logoIcon}>
+              <span className={styles.logoTF}>TF</span>
+            </div>
+            <span className={styles.brandName}>TeamFlow</span>
+          </Link>
+
+          <div className={styles.brandTagline}>
+            <Zap size={20} />
+            <span>Enterprise Team Collaboration</span>
+          </div>
+        </div>
+
+        <div className={styles.heroContent}>
+          <h1 className={styles.heroTitle}>
+            Welcome Back to Your Command Center
+          </h1>
+          <p className={styles.heroSubtitle}>
+            Sign in to access your projects, team analytics, and real-time collaboration tools. Everything you need to drive productivity.
+          </p>
+
+          <div className={styles.featuresGrid}>
+            <div className={styles.featureCard}>
+              <div className={styles.featureIconWrapper}>
+                <Shield size={24} />
+              </div>
+              <h3 className={styles.featureTitle}>Enterprise Security</h3>
+              <p className={styles.featureDesc}>Bank-level encryption & secure access</p>
+            </div>
+
+            <div className={styles.featureCard}>
+              <div className={styles.featureIconWrapper}>
+                <Clock size={24} />
+              </div>
+              <h3 className={styles.featureTitle}>Real-time Sync</h3>
+              <p className={styles.featureDesc}>Live updates across all devices</p>
+            </div>
+
+            <div className={styles.featureCard}>
+              <div className={styles.featureIconWrapper}>
+                <Sparkles size={24} />
+              </div>
+              <h3 className={styles.featureTitle}>AI Insights</h3>
+              <p className={styles.featureDesc}>Smart analytics & predictions</p>
+            </div>
+
+            <div className={styles.featureCard}>
+              <div className={styles.featureIconWrapper}>
+                <Users size={24} />
+              </div>
+              <h3 className={styles.featureTitle}>Team Management</h3>
+              <p className={styles.featureDesc}>Seamless collaboration tools</p>
+            </div>
+          </div>
+
+          <div className={styles.statsContainer}>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>99.9%</div>
+              <div className={styles.statLabel}>Uptime</div>
+            </div>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>40%</div>
+              <div className={styles.statLabel}>Productivity Boost</div>
+            </div>
+            <div className={styles.statItem}>
+              <div className={styles.statNumber}>10k+</div>
+              <div className={styles.statLabel}>Teams</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <h2 className="auth-title">Welcome Back</h2>
-      <p className="auth-subtitle">Sign in to manage your projects and team</p>
-      
-      <form onSubmit={handleSubmit} className="auth-form">
-        <div>
-          <label className="auth-label">
-            <span className="auth-label-icon">✉️</span>
-            Email
-          </label>
-          <input
-            type="email"
-            name="email"
-            value={form.email}
-            onChange={handleChange}
-            required
-            placeholder="you@company.com"
-            className="auth-input"
-          />
-        </div>
-
-        <div>
-          <label className="auth-label">
-            <span className="auth-label-icon">🔒</span>
-            Password
-          </label>
-          <div className="pw-wrapper">
-            <input
-              type={show ? "text" : "password"}
-              name="password"
-              value={form.password}
-              onChange={handleChange}
-              required
-              placeholder="Enter your password"
-              minLength={8}
-              className="auth-input"
-            />
-            <span 
-              className="pw-eye" 
-              onClick={() => setShow((s) => !s)}
-              role="button"
-              aria-label="Toggle password visibility"
-            >
-              {show ? (
-                <svg className="pw-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                </svg>
-              ) : (
-                <svg className="pw-icon" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
-                </svg>
-              )}
-            </span>
+      {/* Right Side - Login Form */}
+      <div className={styles.rightPanel}>
+        <div className={styles.authCard}>
+          <div className={styles.cardHeader}>
+            <h1 className={styles.cardTitle}>Welcome back</h1>
+            <div className={styles.authSwitch}>
+              <span>New to TeamFlow?</span>
+              <Link to="/signup" className={styles.switchLink}>
+                Create an account
+              </Link>
+            </div>
           </div>
+
+          <form onSubmit={handleSubmit} className={styles.authForm}>
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                Email address
+              </label>
+              <div className={styles.inputWrapper}>
+                <input
+                  type="email"
+                  name="email"
+                  value={form.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="you@company.com"
+                  className={styles.formInput}
+                />
+              </div>
+            </div>
+
+            <div className={styles.formGroup}>
+              <label className={styles.formLabel}>
+                Password
+              </label>
+              <div className={styles.inputWrapper}>
+                <input
+                  type={show ? "text" : "password"}
+                  name="password"
+                  value={form.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your password"
+                  minLength={8}
+                  className={styles.formInput}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShow((s) => !s)}
+                  className={styles.passwordToggle}
+                  aria-label={show ? "Hide password" : "Show password"}
+                >
+                  {show ? <EyeOff size={18} /> : <Eye size={18} />}
+                </button>
+              </div>
+              <div className={styles.formOptions}>
+                <label className={styles.rememberMe}>
+                  <input type="checkbox" />
+                  <span>Remember me</span>
+                </label>
+                <a href="#" className={styles.forgotPassword}>
+                  Forgot password?
+                </a>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className={styles.submitButton}
+            >
+              {loading ? (
+                <>
+                  <span className={styles.spinner} />
+                  Signing in...
+                </>
+              ) : (
+                <>
+                  Sign In
+                  <ArrowRight size={20} />
+                </>
+              )}
+            </button>
+
+            <div className={styles.divider}>
+              <span>or continue with</span>
+            </div>
+
+            <button type="button" className={styles.socialButton}>
+              <svg className={styles.socialIcon} viewBox="0 0 24 24">
+                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+              </svg>
+              Continue with Google
+            </button>
+
+            <div className={styles.authFooter}>
+              <Link to="/" className={styles.backLink}>
+                Back to Home
+              </Link>
+            </div>
+          </form>
         </div>
-        
-        <button type="submit" disabled={loading} className="auth-btn">
-          {loading ? "Signing in..." : "Sign In"}
-        </button>
-      </form>
-      
-      <p className="auth-footer">
-        Don't have an account?{" "}
-        <Link to="/signup">Sign up here</Link>
-      </p>
+      </div>
     </div>
   );
 }

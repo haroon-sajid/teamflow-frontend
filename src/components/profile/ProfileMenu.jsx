@@ -6,9 +6,12 @@ import {
   FiHelpCircle,
   FiLogOut,
   FiChevronDown,
-  FiCreditCard
+  FiCreditCard,
+  FiSettings
 } from "react-icons/fi";
 import { toast } from "react-hot-toast";
+import { useSidebar } from "../layout/Sidebar";
+import styles from "../../styles/ProfileMenu.module.css";
 
 export default function ProfileMenu() {
   const [isOpen, setIsOpen] = useState(false);
@@ -22,19 +25,31 @@ export default function ProfileMenu() {
   const navigate = useNavigate();
   const menuRef = useRef(null);
 
-  // Get user data from localStorage - FIXED: Read from correct sources
+  // Safely get sidebar context - may be undefined if used outside SidebarProvider
+  let isCollapsed = false;
+  let isDarkMode = false;
+
+  try {
+    const sidebarContext = useSidebar();
+    isCollapsed = sidebarContext?.isCollapsed || false;
+    isDarkMode = sidebarContext?.isDarkMode || false;
+  } catch (error) {
+    // ProfileMenu is being used outside of SidebarProvider, use defaults
+    console.log('ProfileMenu used outside SidebarProvider, using default values');
+  }
+
+  // Get user data from localStorage
   useEffect(() => {
     const getUserData = () => {
       try {
-        // ✅ FIXED: Read from user object stored by AuthContext, not individual items
         const storedUser = localStorage.getItem("user");
         const userObj = storedUser ? JSON.parse(storedUser) : {};
-        
+
         const userRole = userObj.role || localStorage.getItem("userRole") || "";
         const userName = userObj.full_name || userObj.name || localStorage.getItem("userName") || "User";
         const userEmail = userObj.email || localStorage.getItem("userEmail") || "user@example.com";
 
-        // ✅ FIXED: Strict check - only "super_admin" can see Upgrade Plan
+        // Strict check - only "super_admin" can see Upgrade Plan
         const isSuperAdmin = userRole === "super_admin";
 
         // Generate initials from full name
@@ -100,7 +115,17 @@ export default function ProfileMenu() {
   };
 
   const handleLogout = () => {
+    // Preserve sidebar settings
+    const theme = localStorage.getItem('sidebarTheme');
+    const collapsed = localStorage.getItem('sidebarCollapsed');
+
+    // Clear all data
     localStorage.clear();
+
+    // Restore sidebar settings if they existed
+    if (theme) localStorage.setItem('sidebarTheme', theme);
+    if (collapsed) localStorage.setItem('sidebarCollapsed', collapsed);
+
     toast.success("Logged out successfully");
     navigate("/login");
     setIsOpen(false);
@@ -133,54 +158,69 @@ export default function ProfileMenu() {
   };
 
   return (
-    <div className="profile-menu-container" ref={menuRef}>
-      {/* Profile Button */}
-      <button onClick={() => setIsOpen(!isOpen)} className="profile-button">
-        <div className="profile-avatar">
-          <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-semibold">
+    <div className={`${styles.profileMenuContainer} ${isCollapsed ? styles.collapsed : ''} ${isDarkMode ? styles.dark : styles.light}`} ref={menuRef}>
+      {/* Profile Button - Clickable */}
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={styles.profileButton}
+        title={isCollapsed ? userData.fullName : ""}
+      >
+        <div className={styles.profileAvatar}>
+          <span className={styles.avatarInitials}>
             {userData.initials}
-          </div>
+          </span>
         </div>
 
-        <div className="profile-info">
-          <span className="profile-name">{userData.fullName}</span>
-          <span className="profile-email">{userData.email}</span>
-        </div>
+        {!isCollapsed && (
+          <>
+            <div className={styles.profileInfo}>
+              <div className={styles.profileName}>{userData.fullName}</div>
+              <div className={styles.profileRole}>{userData.role}</div>
+            </div>
 
-        <motion.div
-          className="profile-arrow"
-          variants={iconVariants}
-          animate={isOpen ? "open" : "closed"}
-          transition={{ duration: 0.2 }}
-        >
-          <FiChevronDown size={16} />
-        </motion.div>
+            <motion.div
+              className={styles.profileArrow}
+              variants={iconVariants}
+              animate={isOpen ? "open" : "closed"}
+              transition={{ duration: 0.2 }}
+            >
+              <FiChevronDown size={16} />
+            </motion.div>
+          </>
+        )}
       </button>
 
       {/* Dropdown Menu */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
-            className="profile-dropdown"
+            className={styles.profileDropdown}
             variants={menuVariants}
             initial="closed"
             animate="open"
             exit="closed"
+            style={{
+              transformOrigin: isCollapsed ? "bottom right" : "bottom left",
+              position: 'fixed',
+              left: isCollapsed ? '80px' : '260px',
+              bottom: '20px',
+              zIndex: 1000
+            }}
           >
             {/* User Info Header */}
-            <div className="dropdown-header">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="profile-avatar">
-                  <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white text-sm font-semibold">
+            <div className={styles.dropdownHeader}>
+              <div className={styles.userInfo}>
+                <div className={styles.dropdownAvatar}>
+                  <span className={styles.dropdownInitials}>
                     {userData.initials}
-                  </div>
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="profile-name">{userData.fullName}</div>
-                  <div className="profile-email">
+                <div className={styles.userDetails}>
+                  <div className={styles.userName}>{userData.fullName}</div>
+                  <div className={styles.userRole}>
                     {userData.role}
                     {userData.isSuperAdmin && (
-                      <span className="admin-badge"> • Admin</span>
+                      <span className={styles.adminBadge}>Admin</span>
                     )}
                   </div>
                 </div>
@@ -188,30 +228,29 @@ export default function ProfileMenu() {
             </div>
 
             {/* Menu Items */}
-            <div className="dropdown-items">
-              <button onClick={handleProfileClick} className="dropdown-item">
-                <FiUser size={16} className="text-slate-400" />
-                <span>Profile & Settings</span>
+            <div className={styles.dropdownItems}>
+              <button onClick={handleProfileClick} className={styles.dropdownItem}>
+                <FiUser size={16} className={styles.itemIcon} />
+                <span>Profile Settings</span>
               </button>
 
-              {/* ✅ FIXED: Only show Upgrade Plan for super admins */}
               {userData.isSuperAdmin && (
-                <button onClick={handleUpgradeClick} className="dropdown-item">
-                  <FiCreditCard size={16} className="text-slate-400" />
+                <button onClick={handleUpgradeClick} className={styles.dropdownItem}>
+                  <FiCreditCard size={16} className={styles.itemIcon} />
                   <span>Upgrade Plan</span>
                 </button>
               )}
 
-              <button onClick={handleHelpClick} className="dropdown-item">
-                <FiHelpCircle size={16} className="text-slate-400" />
+              <button onClick={handleHelpClick} className={styles.dropdownItem}>
+                <FiHelpCircle size={16} className={styles.itemIcon} />
                 <span>Help & Support</span>
               </button>
 
-              <div className="border-t border-slate-700 my-1"></div>
+              <div className={styles.dropdownDivider}></div>
 
               <button
                 onClick={handleLogout}
-                className="dropdown-item text-red-400 hover:text-red-300 hover:bg-red-900/20"
+                className={`${styles.dropdownItem} ${styles.logoutItem}`}
               >
                 <FiLogOut size={16} />
                 <span>Log out</span>
