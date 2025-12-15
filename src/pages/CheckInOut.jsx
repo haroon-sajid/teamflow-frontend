@@ -100,23 +100,27 @@ const CheckInOut = () => {
     const [weeklyAttendance, setWeeklyAttendance] = useState("0%");
 
     // Helper: Fix Timezone Issue - Fix for backend time showing UTC+Offset when it should be Local
+    // Helper: Parse backend time (handles both ISO strings and legacy HH:MM)
     const parseBackendTime = (timeStr, isCheckOut = false) => {
         if (!timeStr) return null;
 
         try {
+            // Handle ISO 8601 format (e.g., 2025-12-15T08:01:00Z)
+            // This is the preferred format as it handles timezones correctly
+            if (timeStr.includes('T') || timeStr.includes('Z')) {
+                return new Date(timeStr);
+            }
+
+            // Legacy fallback for HH:MM format
+            // Assumes the time is for "today"
             const date = new Date();
             const [hours, minutes] = timeStr.split(':').map(Number);
             date.setHours(hours, minutes, 0, 0);
 
-            const now = new Date();
-            const diffMinutes = (date - now) / 60000;
-
-            // If time is in future by more than 5 minutes, assume timezone offset issue
-            // For UTC+5 (PKT), we need to subtract 5 hours (300 minutes)
-            if (diffMinutes > 5) {
-                console.log(`Fixing timezone issue: ${timeStr} is ${diffMinutes} mins in future.`);
-                date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
-            }
+            // Note: HH:MM format is ambiguous regarding timezone. 
+            // If the backend sent UTC as HH:MM, this will be interpreted as Local HH:MM
+            // which causes the bug we are fixing. 
+            // But we keep this for backward compatibility if backend sends local HH:MM.
 
             return date;
         } catch (error) {
@@ -171,7 +175,7 @@ const CheckInOut = () => {
                 const lat = typeof data.latitude === "number" ? data.latitude : null;
                 const lon = typeof data.longitude === "number" ? data.longitude : null;
                 const addr = data.address || data.current_location;
-                
+
                 if (addr || (lat && lon)) {
                     setCurrentLocation({
                         latitude: lat,
@@ -356,7 +360,7 @@ const CheckInOut = () => {
             const start = new Date(checkInTime);
             const now = currentTime;
             const diffMs = now - start;
-            
+
             // Only update if time difference is positive
             if (diffMs >= 0) {
                 const diffHrs = Math.floor(diffMs / 3600000);
@@ -368,7 +372,7 @@ const CheckInOut = () => {
             const start = new Date(checkInTime);
             const end = new Date(checkOutTime);
             const diffMs = end - start;
-            
+
             if (diffMs >= 0) {
                 const diffHrs = Math.floor(diffMs / 3600000);
                 const diffMins = Math.floor((diffMs % 3600000) / 60000);
@@ -384,7 +388,7 @@ const CheckInOut = () => {
                 const now = new Date();
                 const start = new Date(activeBreak.startTime);
                 const diffMs = now - start;
-                
+
                 if (diffMs >= 0) {
                     const diffMins = Math.floor(diffMs / 60000);
                     const hours = Math.floor(diffMins / 60);

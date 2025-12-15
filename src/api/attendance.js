@@ -29,7 +29,7 @@ function handleAuthError(response, result) {
     window.location.href = "/login";
     throw new Error("Authentication failed - please log in again");
   }
-  
+
   const errorMessage = result?.detail || result?.message || "Request failed";
   throw new Error(errorMessage);
 }
@@ -58,7 +58,7 @@ export async function checkIn(checkInData) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -78,7 +78,7 @@ export async function checkOut(checkOutData = {}) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -94,7 +94,7 @@ export async function getTodayStatus() {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -119,7 +119,7 @@ export async function startBreak(breakData) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -136,7 +136,7 @@ export async function endBreak() {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -162,7 +162,7 @@ export async function getAttendanceStats(dateFilter = null) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -177,7 +177,7 @@ export async function getAttendanceStats(dateFilter = null) {
  */
 export async function getAttendanceRecords(filters = {}) {
   const params = new URLSearchParams();
-  
+
   if (filters.startDate) {
     params.set('start_date', filters.startDate.toISOString().split('T')[0]);
   }
@@ -202,7 +202,7 @@ export async function getAttendanceRecords(filters = {}) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -224,7 +224,7 @@ export async function getAttendanceSummary(month = null, year = null) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -247,7 +247,7 @@ export async function createManualAttendance(userId, attendanceData) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -267,7 +267,7 @@ export async function updateAttendance(attendanceId, attendanceData) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -285,7 +285,7 @@ export async function deleteAttendance(attendanceId) {
     const result = await res.json();
     handleAuthError(res, result);
   }
-  
+
   const result = await res.json();
   return result;
 }
@@ -312,7 +312,7 @@ export async function exportAttendance(startDate, endDate) {
   if (!res.ok) {
     handleAuthError(res, result);
   }
-  
+
   return result;
 }
 
@@ -326,17 +326,17 @@ export async function exportAttendance(startDate, endDate) {
  */
 export function downloadAttendanceCSV(exportData) {
   const { filename, headers, data } = exportData;
-  
+
   // Create CSV content
   const csvContent = [
     headers.join(','),
     ...data.map(row => row.map(cell => `"${cell}"`).join(','))
   ].join('\n');
-  
+
   // Create blob and download
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const link = document.createElement('a');
-  
+
   if (link.download !== undefined) {
     const url = URL.createObjectURL(blob);
     link.setAttribute('href', url);
@@ -350,15 +350,30 @@ export function downloadAttendanceCSV(exportData) {
 
 /**
  * Format time string to display format
- * @param {string} timeString - Time string (HH:MM)
+ * @param {string} timeString - Time string (HH:MM) or ISO Date string
  */
 export function formatAttendanceTime(timeString) {
   if (!timeString) return '--:--';
-  
-  const [hours, minutes] = timeString.split(':').map(Number);
+
+  let date;
+  // Check if it's an ISO string (has 'T' or 'Z' or separators like 2024-...)
+  if (timeString.includes('T') || timeString.includes('Z') || (timeString.includes('-') && timeString.length > 10)) {
+    date = new Date(timeString);
+    if (isNaN(date.getTime())) return '--:--'; // Invalid date
+  } else if (timeString.includes(':')) {
+    // Legacy HH:MM format (assume local time for display purposes if just time is given)
+    const [hours, minutes] = timeString.split(':').map(Number);
+    date = new Date();
+    date.setHours(hours, minutes, 0, 0);
+  } else {
+    return '--:--';
+  }
+
+  const hours = date.getHours();
+  const minutes = date.getMinutes();
   const period = hours >= 12 ? 'PM' : 'AM';
   const displayHours = hours % 12 || 12;
-  
+
   return `${displayHours}:${minutes.toString().padStart(2, '0')} ${period}`;
 }
 
@@ -369,19 +384,19 @@ export function formatAttendanceTime(timeString) {
  */
 export function calculateProductiveHours(totalHours, breakTime) {
   if (!totalHours || totalHours === '00:00') return '00:00';
-  
+
   const parseTime = (timeStr) => {
     const [hours, minutes] = timeStr.split(':').map(Number);
     return hours * 60 + minutes;
   };
-  
+
   const totalMinutes = parseTime(totalHours);
   const breakMinutes = breakTime ? parseTime(breakTime) : 0;
-  
+
   const productiveMinutes = Math.max(0, totalMinutes - breakMinutes);
   const hours = Math.floor(productiveMinutes / 60);
   const minutes = productiveMinutes % 60;
-  
+
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
@@ -435,7 +450,7 @@ export function getAttendanceStatusColor(status) {
     half_day: '#8B5CF6',
     late: '#EC4899',
   };
-  
+
   return colors[status] || '#6B7280';
 }
 
@@ -445,7 +460,7 @@ export function getAttendanceStatusColor(status) {
  */
 export function formatAttendanceDate(dateString) {
   if (!dateString) return '';
-  
+
   const date = new Date(dateString);
   return date.toLocaleDateString('en-US', {
     weekday: 'short',
@@ -456,26 +471,40 @@ export function formatAttendanceDate(dateString) {
 
 /**
  * Calculate total hours from check in and check out times
- * @param {string} checkIn - Check in time (HH:MM)
- * @param {string} checkOut - Check out time (HH:MM)
+ * @param {string} checkIn - Check in time (HH:MM) or ISO string
+ * @param {string} checkOut - Check out time (HH:MM) or ISO string
  */
 export function calculateTotalHours(checkIn, checkOut) {
   if (!checkIn || !checkOut) return '00:00';
-  
-  const parseTime = (timeStr) => {
-    const [hours, minutes] = timeStr.split(':').map(Number);
-    return hours * 60 + minutes;
-  };
-  
-  const checkInMinutes = parseTime(checkIn);
-  const checkOutMinutes = parseTime(checkOut);
-  
-  const totalMinutes = checkOutMinutes - checkInMinutes;
+
+  let totalMinutes = 0;
+
+  // Check if inputs are ISO strings
+  const isIso = (str) => str.includes('T') || str.includes('Z') || (str.includes('-') && str.length > 10);
+
+  if (isIso(checkIn) && isIso(checkOut)) {
+    const d1 = new Date(checkIn);
+    const d2 = new Date(checkOut);
+    const diffMs = d2 - d1;
+    totalMinutes = Math.floor(diffMs / 60000);
+  } else {
+    // Legacy HH:MM format
+    const parseTime = (timeStr) => {
+      if (!timeStr.includes(':')) return 0;
+      const [hours, minutes] = timeStr.split(':').map(Number);
+      return hours * 60 + minutes;
+    };
+
+    const checkInMinutes = parseTime(checkIn);
+    const checkOutMinutes = parseTime(checkOut);
+    totalMinutes = checkOutMinutes - checkInMinutes;
+  }
+
   if (totalMinutes <= 0) return '00:00';
-  
+
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;
-  
+
   return `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
