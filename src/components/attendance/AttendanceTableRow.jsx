@@ -148,9 +148,7 @@ const AttendanceTableRow = ({ record, weeklyData }) => {
         {record.checkIn ? (
           <div className={styles["time-value"]}>
             {formatAttendanceTime(record.checkIn)}
-            {record.isLate && (
-              <span className={styles["late-indicator"]}>Late</span>
-            )}
+
           </div>
         ) : (
           <span className={styles["no-data"]}>--:--</span>

@@ -157,7 +157,10 @@ const AttendanceTracking = () => {
         emp.status === 'absent' && emp.checkIn === null
       ).length;
 
-      const actualLateToday = employeeRows.filter(emp => emp.isLate).length;
+      // Calculate Remote Work count
+      const actualRemoteToday = employeeRows.filter(emp =>
+        emp.location && emp.location.toLowerCase() === 'remote'
+      ).length;
 
       // Calculate average hours (HH:MM format)
       const totalHoursList = employeeRows
@@ -187,7 +190,7 @@ const AttendanceTracking = () => {
         total_employees: totalEmployees,
         present_today: actualPresentToday, // ✅ Actual count from records
         on_leave: actualAbsentToday,
-        late_arrivals: actualLateToday,
+        remote_work: actualRemoteToday,
         average_hours: averageHours,
         attendance_rate_today: attendanceRateToday
       });
@@ -196,7 +199,7 @@ const AttendanceTracking = () => {
         total: totalEmployees,
         present: actualPresentToday,
         absent: actualAbsentToday,
-        late: actualLateToday
+        remote: actualRemoteToday
       });
 
     } catch (error) {
@@ -211,7 +214,7 @@ const AttendanceTracking = () => {
         total_employees: 0,
         present_today: 0,
         on_leave: 0,
-        late_arrivals: 0,
+        remote_work: 0,
         average_hours: 0
       });
     } finally {
@@ -390,7 +393,7 @@ const AttendanceTracking = () => {
     total_employees: attendanceStats.total_employees || 0,
     present_today: attendanceStats.present_today || 0,
     on_leave: attendanceStats.on_leave || 0,
-    late_arrivals: attendanceStats.late_arrivals || 0,
+    remote_work: attendanceStats.remote_work || 0,
     average_hours: attendanceStats.average_hours || 0
   };
 

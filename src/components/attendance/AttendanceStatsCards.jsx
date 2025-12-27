@@ -1,9 +1,8 @@
-// src/components/teams/AttendanceStatsCards.jsx
 import {
   FiUsers,
   FiCheckCircle,
   FiCalendar,
-  FiClock,
+  FiHome,
   FiTrendingUp
 } from "react-icons/fi";
 import styles from "../../styles/attendance/AttendanceStatsCards.module.css";
@@ -45,20 +44,20 @@ const AttendanceStatsCards = ({ stats, isLoading }) => {
       bgColor: "#FFFBEB"
     },
     {
-      id: "late_arrivals",
-      title: "Late Arrivals",
-      value: stats.late_arrivals || 0,
-      icon: <FiClock />,
-      color: "#EF4444",
-      bgColor: "#FEF2F2"
+      id: "remote_work",
+      title: "Remote Work",
+      value: stats.remote_work || 0,
+      icon: <FiHome />,
+      color: "#8B5CF6", // Purple for Remote
+      bgColor: "#F5F3FF"
     },
     {
       id: "average_hours",
       title: "Avg. Hours",
       value: stats.average_hours || "00:00",
       icon: <FiTrendingUp />,
-      color: "#8B5CF6",
-      bgColor: "#F5F3FF"
+      color: "#6366F1", // Indigo for Avg Hours to differentiate
+      bgColor: "#EEF2FF"
     }
   ];
 
