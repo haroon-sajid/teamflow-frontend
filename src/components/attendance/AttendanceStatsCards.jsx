@@ -9,6 +9,16 @@ import {
 import styles from "../../styles/attendance/AttendanceStatsCards.module.css";
 
 const AttendanceStatsCards = ({ stats, isLoading }) => {
+  // Helper to get numeric hours for progress bar
+  const getNumericHours = (val) => {
+    if (typeof val === 'number') return val;
+    if (typeof val === 'string' && val.includes(':')) {
+      const [h, m] = val.split(':').map(Number);
+      return h + (m / 60);
+    }
+    return parseFloat(val) || 0;
+  };
+
   const cards = [
     {
       id: "total_employees",
@@ -45,9 +55,7 @@ const AttendanceStatsCards = ({ stats, isLoading }) => {
     {
       id: "average_hours",
       title: "Avg. Hours",
-      value: typeof stats.average_hours === 'number' 
-        ? stats.average_hours.toFixed(1)
-        : '0.0',
+      value: stats.average_hours || "00:00",
       icon: <FiTrendingUp />,
       color: "#8B5CF6",
       bgColor: "#F5F3FF"
@@ -57,8 +65,8 @@ const AttendanceStatsCards = ({ stats, isLoading }) => {
   return (
     <div className={styles["stats-cards"]}>
       {cards.map(card => (
-        <div 
-          key={card.id} 
+        <div
+          key={card.id}
           className={styles["stat-card"]}
           style={{ backgroundColor: card.bgColor }}
         >
@@ -68,26 +76,29 @@ const AttendanceStatsCards = ({ stats, isLoading }) => {
                 {isLoading ? (
                   <div className={styles["value-skeleton"]}></div>
                 ) : (
-                  card.value
+                  // Display value as is (logic handled in card definition)
+                  typeof card.value === 'number' && card.id === 'average_hours'
+                    ? card.value.toFixed(1)
+                    : card.value
                 )}
               </div>
               <div className={styles["stat-title"]}>{card.title}</div>
             </div>
-            <div 
+            <div
               className={styles["stat-icon"]}
               style={{ color: card.color }}
             >
               {card.icon}
             </div>
           </div>
-          
+
           {/* Progress bar for average hours */}
           {card.id === "average_hours" && !isLoading && (
             <div className={styles["progress-bar"]}>
-              <div 
+              <div
                 className={styles["progress-fill"]}
                 style={{
-                  width: `${Math.min(100, (parseFloat(card.value) / 8) * 100)}%`,
+                  width: `${Math.min(100, (getNumericHours(card.value) / 8) * 100)}%`,
                   backgroundColor: card.color
                 }}
               ></div>

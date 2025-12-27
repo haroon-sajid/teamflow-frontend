@@ -135,21 +135,19 @@ const CheckInOut = () => {
             const result = await HoursApi.getWeeklyHours();
             if (result.success && result.data) {
                 const data = result.data;
-                // Update weekly hours
-                const totalHoursStr = data.total_hours || "0:00";
-                const [hours, mins] = totalHoursStr.split(':').map(Number);
-                const totalDecimal = (hours + mins / 60).toFixed(1);
-                setWeeklyTotalHours(totalDecimal);
 
-                // Calculate average daily (total hours / days worked)
-                const daysWorked = data.days_count || 1;
-                const avgDaily = (parseFloat(totalDecimal) / daysWorked).toFixed(1);
-                setWeeklyAvgDaily(avgDaily);
+                // Keep total hours in HH:MM format (not decimal)
+                const totalHoursStr = data.total_hours || "00:00";
+                setWeeklyTotalHours(totalHoursStr);
 
-                // Calculate attendance percentage
-                const workingDaysInWeek = 5;
-                const attendancePercent = Math.round((daysWorked / workingDaysInWeek) * 100);
-                setWeeklyAttendance(`${attendancePercent}%`);
+                // Keep average daily in HH:MM format (not decimal)
+                const avgDailyStr = data.average_daily_hours || "00:00";
+                setWeeklyAvgDaily(avgDailyStr);
+
+                // Show attendance as "X/5 days" format (Monday-Friday work week)
+                const daysWorked = data.working_days || 0;
+                const workingDaysInWeek = 5; // Monday to Friday
+                setWeeklyAttendance(`${daysWorked}/5 days`);
             }
         } catch (error) {
             console.error("Error fetching weekly summary:", error);
@@ -318,21 +316,15 @@ const CheckInOut = () => {
             }
             setSessionHistory(sessions);
 
-            // Update total hours
-            if (data.total_hours && data.total_hours !== "00:00") {
+            // Update total hours - ALWAYS use backend value (backend is source of truth)
+            if (data.total_hours !== undefined && data.total_hours !== null) {
                 setTotalHours(data.total_hours);
-            } else if (cin && cout) {
-                // Calculate from times if API doesn't provide
-                const diff = cout - cin;
-                const hours = Math.floor(diff / 3600000);
-                const minutes = Math.floor((diff % 3600000) / 60000);
-                setTotalHours(`${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`);
             } else {
                 setTotalHours("00:00");
             }
 
-            // Update break time
-            if (data.break_time) {
+            // Update break time - ALWAYS use backend value
+            if (data.break_time !== undefined && data.break_time !== null) {
                 setBreakTime(data.break_time);
             } else {
                 setBreakTime("00:00");
@@ -354,32 +346,20 @@ const CheckInOut = () => {
         return () => clearInterval(timer);
     }, []);
 
-    // Calculate total hours in real-time when checked in
+    // Poll backend for live updates when checked in (backend is source of truth)
     useEffect(() => {
-        if (checkInTime && !checkOutTime && isCheckedIn) {
-            const start = new Date(checkInTime);
-            const now = currentTime;
-            const diffMs = now - start;
-
-            // Only update if time difference is positive
-            if (diffMs >= 0) {
-                const diffHrs = Math.floor(diffMs / 3600000);
-                const diffMins = Math.floor((diffMs % 3600000) / 60000);
-                setTotalHours(`${diffHrs.toString().padStart(2, '0')}:${diffMins.toString().padStart(2, '0')}`);
-            }
-        } else if (checkInTime && checkOutTime) {
-            // Already checked out - calculate from stored times
-            const start = new Date(checkInTime);
-            const end = new Date(checkOutTime);
-            const diffMs = end - start;
-
-            if (diffMs >= 0) {
-                const diffHrs = Math.floor(diffMs / 3600000);
-                const diffMins = Math.floor((diffMs % 3600000) / 60000);
-                setTotalHours(`${diffHrs.toString().padStart(2, '0')}:${diffMins.toString().padStart(2, '0')}`);
-            }
+        let interval;
+        if (isCheckedIn && !checkOutTime) {
+            // Fetch updated status every 10 seconds when checked in
+            interval = setInterval(() => {
+                fetchTodayStatus();
+            }, 10000); // Poll every 10 seconds for live update
         }
-    }, [checkInTime, checkOutTime, currentTime, isCheckedIn]);
+
+        return () => {
+            if (interval) clearInterval(interval);
+        };
+    }, [isCheckedIn, checkOutTime]);
 
     // Calculate active break duration
     useEffect(() => {
@@ -516,25 +496,7 @@ const CheckInOut = () => {
             // Call API
             await checkIn(checkInData);
 
-            // Update local state
-            const now = new Date();
-            setCheckInTime(now);
-            setIsCheckedIn(true);
-            setCheckOutTime(null);
-            setTotalHours("00:00");
-            setActiveBreak(null);
-            setBreakDuration("00:00");
-
-            // Add to session history
-            const newSession = {
-                id: Date.now(),
-                type: "check-in",
-                time: now,
-                location: workLocation
-            };
-            setSessionHistory(prev => [newSession, ...prev]);
-
-            // Refresh status
+            // Refresh status from backend (single source of truth)
             await fetchTodayStatus();
             await fetchWeeklySummary();
 
@@ -575,22 +537,7 @@ const CheckInOut = () => {
             // Call API
             await checkOut(checkOutData);
 
-            // Update local state
-            const now = new Date();
-            setCheckOutTime(now);
-            setIsCheckedIn(false);
-
-            // Add to session history
-            const newSession = {
-                id: Date.now(),
-                type: "check-out",
-                time: now,
-                totalHours: totalHours,
-                breakTime: breakTime
-            };
-            setSessionHistory(prev => [newSession, ...prev]);
-
-            // Refresh status
+            // Refresh status from backend (single source of truth)
             await fetchTodayStatus();
             await fetchWeeklySummary();
 
@@ -627,31 +574,10 @@ const CheckInOut = () => {
             // Call API
             await startBreak(breakData);
 
-            const now = new Date();
-            const breakType = breakTypes.find(bt => bt.id === selectedBreakType);
-
-            const newBreak = {
-                id: Date.now(),
-                type: selectedBreakType,
-                name: breakType.name,
-                color: breakType.color,
-                icon: breakType.icon,
-                description: breakType.description,
-                startTime: now,
-                endTime: null,
-                duration: "00:00"
-            };
-
-            setActiveBreak(newBreak);
-            setIsOnBreak(true);
-            setBreakDuration("00:00");
-
-            // Add to break history
-            setBreakHistory(prev => [newBreak, ...prev]);
-
-            // Refresh status
+            // Refresh status from backend
             await fetchTodayStatus();
 
+            const breakType = breakTypes.find(bt => bt.id === selectedBreakType);
             toast.success(`Started ${breakType.name} break`);
 
         } catch (error) {
@@ -675,28 +601,13 @@ const CheckInOut = () => {
             // Call API
             await endBreak();
 
-            const now = new Date();
-            const endBreakObj = {
-                ...activeBreak,
-                endTime: now,
-                duration: breakDuration
-            };
+            // Store break name for success message before clearing state
+            const breakName = activeBreak.name;
 
-            // Update break history
-            setBreakHistory(prev =>
-                prev.map(item =>
-                    item.id === activeBreak.id ? endBreakObj : item
-                )
-            );
-
-            setActiveBreak(null);
-            setIsOnBreak(false);
-            setSelectedBreakType('break'); // Reset to default break type
-
-            // Refresh status
+            // Refresh status from backend
             await fetchTodayStatus();
 
-            toast.success(`Ended ${activeBreak.name} break`);
+            toast.success(`Ended ${breakName} break`);
 
         } catch (error) {
             console.error("Error ending break:", error);

@@ -162,7 +162,7 @@ const AttendanceTableRow = ({ record, weeklyData }) => {
         {record.breakTime && record.breakTime !== "00:00" ? (
           <div className={styles["break-time"]}>
             <FiClock className={styles["break-icon"]} />
-            {record.breakTime ? record.breakTime.toString().replace('-', '') : ""}
+            {record.breakTime}
           </div>
         ) : (
           <span className={styles["no-data"]}>No breaks</span>

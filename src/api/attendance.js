@@ -498,9 +498,15 @@ export function calculateTotalHours(checkIn, checkOut) {
     const checkInMinutes = parseTime(checkIn);
     const checkOutMinutes = parseTime(checkOut);
     totalMinutes = checkOutMinutes - checkInMinutes;
+    
+    // ✅ FIX: Handle overnight shifts (negative result)
+    if (totalMinutes < 0) {
+      totalMinutes += 24 * 60; // Add 24 hours
+    }
   }
 
-  if (totalMinutes <= 0) return '00:00';
+  // ✅ FIX: Changed from <= to < (allow 0 to pass through for edge cases, but return 00:00 for negative)
+  if (totalMinutes < 0) return '00:00';
 
   const hours = Math.floor(totalMinutes / 60);
   const minutes = totalMinutes % 60;

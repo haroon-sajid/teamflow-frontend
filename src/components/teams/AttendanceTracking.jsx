@@ -159,18 +159,22 @@ const AttendanceTracking = () => {
 
       const actualLateToday = employeeRows.filter(emp => emp.isLate).length;
 
-      // Calculate average hours
+      // Calculate average hours (HH:MM format)
       const totalHoursList = employeeRows
         .map(emp => emp.totalHours || "00:00")
         .filter(hours => hours !== "00:00");
 
-      let averageHours = 0;
+      let averageHours = "00:00";
       if (totalHoursList.length > 0) {
         const totalMinutes = totalHoursList.reduce((sum, timeStr) => {
           const [h, m] = timeStr.split(':').map(Number);
           return sum + (h * 60 + m);
         }, 0);
-        averageHours = totalMinutes / totalHoursList.length / 60;
+
+        const avgMin = totalMinutes / totalHoursList.length;
+        const h = Math.floor(avgMin / 60);
+        const m = Math.round(avgMin % 60);
+        averageHours = `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}`;
       }
 
       // Update stats with correct counts
