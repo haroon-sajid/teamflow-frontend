@@ -1,7 +1,7 @@
 // src/pages/TeamManagement.jsx
 import { useState, useContext, useEffect } from "react";
 import { AuthContext } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   FiUsers,
   FiMail,
@@ -25,8 +25,22 @@ import styles from "../styles/TeamManagement.module.css";
 const TeamManagement = () => {
   const { user } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("overview");
+  const location = useLocation();
+
+  // Get initial tab from query param
+  const queryParams = new URLSearchParams(location.search);
+  const initialTab = queryParams.get("tab") || "overview";
+
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [loading, setLoading] = useState(true);
+
+  // Update tab if query param changes
+  useEffect(() => {
+    const tab = new URLSearchParams(location.search).get("tab");
+    if (tab && tab !== activeTab) {
+      setActiveTab(tab);
+    }
+  }, [location.search]);
 
   // Check if user is admin
   useEffect(() => {
@@ -51,7 +65,7 @@ const TeamManagement = () => {
       icon: <FiUsers />,
       component: <TeamOverview />
     },
-        {
+    {
       id: "attendance",
       label: "Attendance Tracking",
       icon: <FiClock />,

@@ -29,6 +29,8 @@ import LandingPage from './pages/LandingPage'; // ✅ Added Landing Page import
 import PlansPage from './pages/PlansPage';
 import PaymentSuccess from './pages/PaymentSuccess';
 import PaymentCancel from './pages/PaymentCancel';
+import AdminNotifications from './pages/AdminNotifications'; // ✅ Added Admin Notifications
+
 
 // =========================================
 // ✅ Axios Interceptor for Token Auth
@@ -41,43 +43,58 @@ axios.interceptors.request.use(
     }
     return config;
   },
-  (error) => Promise.reject(error)
+  (error) => {
+    return Promise.reject(error);
+  }
 );
-
 
 // =========================================
 // ✅ Protected Route Component
 // =========================================
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { user, loading } = useAuth(); // Assuming useAuth provides loading state
-  const token = localStorage.getItem("token"); // Fallback check
+  const { user, loading } = useAuth();
+  const token = localStorage.getItem("token");
 
   if (loading) return <div>Loading...</div>;
-  if (!user && !token) return <Navigate to="/login" />;
 
-  if (allowedRoles && user && !allowedRoles.includes(user.role)) {
-    return <Navigate to="/unauthorized" />;
-    // Or redirect to their dashboard
-    // return <Navigate to={user.role === 'admin' ? '/admin' : '/member'} />;
+  if (!token) return <Navigate to="/login" />;
+
+  if (allowedRoles && !allowedRoles.includes(user?.role)) {
+    return <Navigate to={user?.role === 'admin' ? '/admin' : '/member'} />;
   }
 
   return children;
 };
 
-// =========================================
-// ✅ App Component
-// =========================================
 function App() {
   return (
     <>
-      <Toaster position="top-center" />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          duration: 4000,
+          style: {
+            background: '#ffffff',
+            color: '#1e293b',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+            borderRadius: '12px',
+            border: '1px solid #f1f5f9',
+            padding: '12px 16px',
+            fontSize: '0.875rem',
+            fontWeight: '500',
+          },
+          success: {
+            iconTheme: {
+              primary: '#3b82f6',
+              secondary: '#ffffff',
+            },
+          },
+        }}
+      />
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/login" element={<Login />} />
-        {/* <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/login" element={<Login />} /> */}
         <Route path="/admin" element={<AdminDashboard />} />
         <Route path="/member" element={<MemberDashboard />} />
         <Route path="/projects" element={<CreateProjects />} />
@@ -103,6 +120,13 @@ function App() {
           </ProtectedRoute>
         } />
 
+        {/* Admin Notifications */}
+        <Route path="/admin/notifications" element={
+          <ProtectedRoute allowedRoles={["super_admin", "admin"]}>
+            <AdminNotifications />
+          </ProtectedRoute>
+        } />
+
         <Route path="/my-attendance" element={
           <ProtectedRoute>
             <CheckInOut />
@@ -118,14 +142,8 @@ function App() {
         <Route path="/payment/success" element={<PaymentSuccess />} />
         <Route path="/payment/cancel" element={<PaymentCancel />} />
 
-        {/* Remove these duplicate routes or keep them as aliases */}
-        {/* <Route path="/payment-success" element={<PaymentSuccess />} /> */}
-        {/* <Route path="/payment-cancel" element={<PaymentCancel />} /> */}
-
-        {/* ✅ Remove these duplicates - they're already defined above */}
-        {/* <Route path="/profile" element={<ProfilePage />} /> */}
-        {/* <Route path="/plans" element={<PlansPage />} /> */}
-        {/* <Route path="/support" element={<HelpSupport />} /> */}
+        {/* 🔹 Default Redirects */}
+        <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
     </>
   );

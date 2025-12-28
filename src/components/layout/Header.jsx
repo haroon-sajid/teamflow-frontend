@@ -1,5 +1,7 @@
 import React from "react";
 import styles from "../../styles/Header.module.css"; // Import as module
+import NotificationBell from "../notifications/NotificationBell";
+
 
 export default function Header({ title, subtitle, actionButtonText, onActionClick, showSuperAdminBadge = false, actionButtonVariant = 'primary' }) {
     return (
@@ -19,17 +21,22 @@ export default function Header({ title, subtitle, actionButtonText, onActionClic
                     {subtitle && <p className={styles.headerSubtitle}>{subtitle}</p>}
                 </div>
 
-                {/* Right side: Optional Action Button */}
-                {actionButtonText && onActionClick && (
-                    <div className={styles.headerRight}>
+
+                {/* Right side: Actions */}
+                <div className={styles.headerRight}>
+                    {/* Notification Bell */}
+                    <NotificationBell />
+
+                    {/* Optional Action Button */}
+                    {actionButtonText && onActionClick && (
                         <button
                             className={`${actionButtonVariant === 'success' ? styles.successBtn : styles.primaryBtn} ${styles.addBtn}`}
                             onClick={onActionClick}
                         >
                             {actionButtonText}
                         </button>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
         </div>
     );
